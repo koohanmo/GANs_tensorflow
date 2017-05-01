@@ -1,5 +1,4 @@
-# VSRGAN
-Video super resolution GAN
+# GANs_tensorflow
 
 
 ## Requirements
