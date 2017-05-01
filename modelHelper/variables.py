@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-def weight_variable_xavier(name,shape):
+def variable_xavier(name,shape):
     """
     변수를 xavier초기화로 초기화 해서 반환
     :param shape:
@@ -31,4 +31,9 @@ def variable_summaries(var):
     Ex) average, stddev, max, min, histogram.....
     :param var:
         tensorboard에 표시 할 변수
+    """
+
+if __name__=="__main__":
+    """
+    Test code...
     """

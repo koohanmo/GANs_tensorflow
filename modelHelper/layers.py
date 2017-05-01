@@ -1,4 +1,5 @@
 import tensorflow as tf
+from . import variables
 
 class batch_norm(object):
     """
@@ -47,5 +48,83 @@ class batch_norm(object):
                                                 scope=self.name)
 
 
+def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_xavier):
+    """
+    Convolution Layer
+    :param input:
+     Input tensor([batch_size, height, width, channel])
+    :param ksize:
+     Kernel(filter) size
+     Ex) [1,2,2,1]
+    :param strides: 
+     Stride dim
+     Ex) [1,2,2,1]
+    :param padding: 
+    Padding Type
+     Ex) 'SAME' or 'VALID'
+    :param layerName:
+     Tensorboard name
+    :param initializer:
+     Default : xavier
+    :return: 
+     Output tensor 
+    """
+
+def maxPool(input,ksize,strides,padding,layerName):
+    """
+    MaxPool Layer
+    :param input: 
+     Input tensor
+    :param ksize:
+     kernel(filter) size
+    :param strides: 
+     Stride dim
+    :param padding:
+     Padding Type
+     Ex) 'SAME' or 'VALID'
+    :param layerName:
+     Tensorboard name
+    :return: 
+     Output tensor
+    """
+
+def avgPool(input,ksize,strides,padding,layerName):
+    """
+    AvgPool Layer
+    :param input: 
+     Input tensor
+    :param ksize:
+     kernel(filter) size
+    :param strides: 
+     Stride dim
+    :param padding:
+     Padding Type
+     Ex) 'SAME' or 'VALID'
+    :param layerName:
+     Tensorboard name
+    :return: 
+     Output tensor
+    """
 
 
+def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
+    """
+    이름이 안떠올라요 도와주세요....
+    WX+B
+    :param input:
+     Input tensor
+    :param outputSize:
+      Output tensor dim
+    :param layerName: 
+     Tensorboard name
+    :param initializer:
+     Default : xavier
+    :return:
+     Output tensor
+    """
+
+
+if __name__=="__main__":
+    """
+    Test code...
+    """
