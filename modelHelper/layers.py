@@ -69,6 +69,29 @@ def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_
     :return: 
      Output tensor 
     """
+    with tf.name_scope(layerName):
+        if(initializer == variables.variable_xavier):
+            with tf.name_scope('weight'):
+                W = variables.variable_xavier(shape = ksize)
+                variables.variable_summaries(W)
+            with tf.name_scope('bias'):
+                B = variables.variable_xavier(shape = ksize[-1])
+                variables.variable_summaries(B)
+        elif(initializer == variables.variable_truncated):
+            with tf.name_scope('weight'):
+                W = variables.variable_truncated(shape = ksize)
+                variables.variable_summaries(W)
+            with tf.name_scope('bias'):
+                B = variables.variable_truncated(shape = ksize[-1])
+                variables.variable_summaries(B)
+        with tf.name_scope('preActivate'):
+            output = tf.nn.conv2d(input = input,
+                                       filter = W,
+                                       strides = strides,
+                                       padding = padding
+                                       ) + B
+        return output
+
 
 def maxPool(input,ksize,strides,padding,layerName):
     """
@@ -87,6 +110,13 @@ def maxPool(input,ksize,strides,padding,layerName):
     :return: 
      Output tensor
     """
+    with tf.name_scope(layerName):
+        output = tf.nn.max_pool(input,
+                                ksize = ksize,
+                                strides=strides,
+                                padding = padding)
+        return output
+
 
 def avgPool(input,ksize,strides,padding,layerName):
     """
@@ -105,7 +135,29 @@ def avgPool(input,ksize,strides,padding,layerName):
     :return: 
      Output tensor
     """
+    with tf.name_scope(layerName):
+        output = tf.nn.avg_pool(input,
+                                ksize = ksize,
+                                strides=strides,
+                                padding = padding)
+        return output
 
+def flatten(input, flatDim, layerName):
+    """
+    Flatten Layer
+    :param input:
+     Input tensor
+    :param flatDim:
+     Output tensor dim
+    :param layerName:
+     Tensorboard name
+    :return:
+     Output tensor
+    """
+    with tf.name_scope(layerName):
+        flatten = tf.reshape(input, [-1, flatDim])
+        variables.variable_summaries(flatten)
+        return flatten
 
 def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
     """
@@ -122,6 +174,23 @@ def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
     :return:
      Output tensor
     """
+    pass
+
+def fullyConnected(input, shape, layerName, initializer = variables.variable_xavier):
+    with tf.name_scope(layerName):
+        if(initializer == variables.variable_xavier):
+            with tf.name_scope('weight'):
+                W = variables.variable_xavier(shape = shape)
+                variables.variable_summaries(W)
+            with tf.name_scope('bias'):
+                B = variables.variable_xavier(shape = shape[-1])
+                variables.variable_summaries(B)
+            with tf.name_scope('preActivate'):
+                preActivate = tf.matmul(input, W) + B
+                tf.summary.histogram(preActivate)
+        return preActivate
+
+
 
 
 if __name__=="__main__":
