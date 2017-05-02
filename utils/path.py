@@ -113,7 +113,7 @@ def getNthPath(dir, nth):
      이미지 경로 반환
      Ex) ImageFiles/origin/conan/frame001.png
     """
-     dirList = os.listdir(dir)
+    dirList = os.listdir(dir)
     if(nth<len(dirList)):
         if (not dirList[nth]):
             print('no nth file')
