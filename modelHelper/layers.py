@@ -70,20 +70,12 @@ def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_
      Output tensor 
     """
     with tf.name_scope(layerName):
-        if(initializer == variables.variable_xavier):
-            with tf.name_scope('weight'):
-                W = variables.variable_xavier(shape = ksize)
-                variables.variable_summaries(W)
-            with tf.name_scope('bias'):
-                B = variables.variable_xavier(shape = ksize[-1])
-                variables.variable_summaries(B)
-        elif(initializer == variables.variable_truncated):
-            with tf.name_scope('weight'):
-                W = variables.variable_truncated(shape = ksize)
-                variables.variable_summaries(W)
-            with tf.name_scope('bias'):
-                B = variables.variable_truncated(shape = ksize[-1])
-                variables.variable_summaries(B)
+        with tf.name_scope('weight'):
+            W = initializer(shape=ksize)
+            variables.variable_summaries(W)
+        with tf.name_scope('bias'):
+            B = initializer(shape=ksize[-1])
+            variables.variable_summaries(B)
         with tf.name_scope('preActivate'):
             output = tf.nn.conv2d(input = input,
                                        filter = W,
