@@ -20,7 +20,7 @@ def getVideoOriginDirPath(name):
      'name'의 원본 비디오 폴더 경로
      Ex) 'Video/origin/conan'
     """
-    return os.path.abspath(originVideoDir+"\\"+name)
+    return os.path.abspath(os.path.join(originVideoDir,name))
 
 
 def getVideoModifedDirPath(name, option='crop'):
@@ -36,7 +36,7 @@ def getVideoModifedDirPath(name, option='crop'):
      'name'의 원본 비디오를 option을 가한 비디오 폴더 경로
      Ex) 'Video/modified/conan/crop'
     """
-    ret = modifiedVideoDir+"\\"+name+"\\"+option
+    ret = os.path.join(modifiedVideoDir, name,option)
     if(not os.path.exists(ret)):
         print('not exist option directory')
         return "None"
@@ -54,7 +54,7 @@ def getImageOriginDirPath(name):
      'name' 이미지 폴더
      Ex) 'ImageFiles/origin/conan'
     """
-    return os.path.abspath(originImageDir+'\\'+name)
+    return os.path.abspath(os.path.join(originImageDir,name))
 
 
 def getImageModifedDirPath(name, option='crop'):
@@ -70,7 +70,7 @@ def getImageModifedDirPath(name, option='crop'):
      'name' 이미지에 option을 가한 이미지 폴더
      Ex) 'Image/modified/conan/crop'
     """
-    ret = modifiedImageDir + '\\' + name + '\\' + option
+    ret = os.path.join(modifiedImageDir , name , option )
     if (not os.path.exists(ret)):
         print('not exist option directory')
         return 'None'
@@ -90,7 +90,7 @@ def getDirList(dir):
     """
     dirList = []
     for i in (os.listdir(dir)):
-        belowDir = dir + "\\" + i
+        belowDir = os.path.join(dir, i)
         if(os.path.isdir(belowDir)):
             dirList.append(belowDir)
 
@@ -113,13 +113,14 @@ def getNthPath(dir, nth):
      이미지 경로 반환
      Ex) ImageFiles/origin/conan/frame001.png
     """
-    dirList = os.listdir(dir)
+     dirList = os.listdir(dir)
     if(nth<len(dirList)):
         if (not dirList[nth]):
             print('no nth file')
             return 'None'
         else:
-            return dir+"\\"+dirList[nth]
+            return os.path.join(dir,dirList[nth])
+
 
 if __name__ == '__main__':
     """
