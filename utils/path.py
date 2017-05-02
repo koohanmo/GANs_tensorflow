@@ -2,10 +2,10 @@ import os
 
 # path variables about video
 videos = ['conan', 'naruto', 'onepiece']
-videoDir = "D:\Project\VSRGAN\Video"
+videoDir = "D:/Project/GANs_tensorflow/Video"
 originVideoDir = os.path.join(videoDir, 'origin')
 modifiedVideoDir = os.path.join(videoDir, 'modified')
-imageDir = "D:\Project\VSRGAN\Image"
+imageDir = "D:/Project/GANs_tensorflow/Image"
 originImageDir = os.path.join(imageDir, 'origin')
 modifiedImageDir = os.path.join(imageDir, 'modified')
 
@@ -88,18 +88,30 @@ def getDirList(dir):
      하위 폴더 리스트
      Ex) [Video/modifed, Video/origin]
     """
-    dirList = []
-    for i in (os.listdir(dir)):
-        belowDir = os.path.join(dir, i)
-        if(os.path.isdir(belowDir)):
-            dirList.append(belowDir)
+    dirList = [os.path.join(dir,x) for x in os.listdir(dir) if os.path.isdir(x)]
 
     if (not dirList):
         print('no below directories')
-        return 'None'
+        return None
     else:
         return dirList
 
+def getFileList(dir):
+    """
+    dir의 하위 file 리스트 반환
+    :param dir:
+     특정 폴더
+     Ex) Video/origin/conan
+    :return:
+     하위 폴더 리스트
+     Ex) [Video/origin/conan/01.mp4, Video/origin/conan/02.mp4]
+    """
+    fileList = [os.path.join(dir,x) for x in os.listdir(dir) if not os.path.isdir(x)]
+    if (not fileList):
+        print('no below files')
+        return None
+    else:
+        return fileList
 
 def getNthPath(dir, nth):
     """
