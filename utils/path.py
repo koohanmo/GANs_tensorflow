@@ -5,7 +5,7 @@ videos = ['conan', 'naruto', 'onepiece']
 videoDir = "D:\Project\VSRGAN\Video"
 originVideoDir = os.path.join(videoDir, 'origin')
 modifiedVideoDir = os.path.join(videoDir, 'modified')
-imageDir = "F:\Project\VSRGAN\Image"
+imageDir = "D:\Project\VSRGAN\Image"
 originImageDir = os.path.join(imageDir, 'origin')
 modifiedImageDir = os.path.join(imageDir, 'modified')
 
@@ -37,10 +37,9 @@ def getVideoModifedDirPath(name, option='crop'):
      Ex) 'Video/modified/conan/crop'
     """
     ret = modifiedVideoDir+"\\"+name+"\\"+option
-
     if(not os.path.exists(ret)):
         print('not exist option directory')
-        return
+        return "None"
     else:
         return ret
 
@@ -74,7 +73,7 @@ def getImageModifedDirPath(name, option='crop'):
     ret = modifiedImageDir + '\\' + name + '\\' + option
     if (not os.path.exists(ret)):
         print('not exist option directory')
-        return
+        return 'None'
     else:
         return ret
 
@@ -97,7 +96,7 @@ def getDirList(dir):
 
     if (not dirList):
         print('no below directories')
-        return
+        return 'None'
     else:
         return dirList
 
@@ -115,13 +114,12 @@ def getNthPath(dir, nth):
      Ex) ImageFiles/origin/conan/frame001.png
     """
     dirList = os.listdir(dir)
-    # print(nth, dirList[nth])
-    if (not dirList[nth]):
-        print('no nth file')
-        return
-    else:
-        return dirList[nth]
-
+    if(nth<len(dirList)):
+        if (not dirList[nth]):
+            print('no nth file')
+            return 'None'
+        else:
+            return dir+"\\"+dirList[nth]
 
 if __name__ == '__main__':
     """
@@ -129,23 +127,23 @@ if __name__ == '__main__':
     """
     print("------path.py------")
     print (videoDir)
-    print(os.listdir(originVideoDir))
-    print(os.listdir(modifiedVideoDir))
+    print(originVideoDir)
+    print(modifiedVideoDir)
     print()
-    print ('getVideoOrigin : ' + getVideoOriginDirPath(videos[0]))
-    print ('getVideoModified : ' + getVideoModifiedDirPath(videos[0]))
-    print("getVideoModified File list : " , os.listdir(getVideoModifiedDirPath(videos[0])))
+    print ('getVideoOrigin : ' + getVideoOriginDirPath(videos[0]))                 # videos[0]에 해당하는 origin/conan의 경로
+    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0]))              # videos[0]에 해당하는 modified/conan/crop의 경로
+    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0],'distort'))    # videos[0]에 해당하는 modified/conan/distort의 경로
     print()
     print(originImageDir)
     print(modifiedImageDir)
     print()
-    print ('getImageOrigin : ' + getImageOriginDirPath(videos[0]))
-    print('getImageO List : ' , os.listdir(getImageOriginDirPath(videos[0])))
-    print('getImageModified : ' + getImageModifiedDirPath(videos[0]))
+    print('getImageOrigin : ' + getImageOriginDirPath(videos[0]))                #videos[0]에 해당하는 origin/conan의 경로(이미지)
+    print('getImageModified : ' + getImageModifiedDirPath(videos[0]))            #videos[0]에 해당하는 modified/conan/crop의 경로(이미지)
+    print('getImageModified : ' + getImageModifiedDirPath(videos[0],'distort')) # videos[0]에 해당하는 modified/conan/crop의 경로(이미지)
     print()
-    print('getList : ', getDirList(videoDir))
-    print('getList : ', getDirList(modifiedVideoDir))
-    print('getList : ', getDirList(getVideoModifiedDirPath(videos[0])))
+    print('getList : ', getDirList(videoDir))                                      #videoDir 하위폴더 origin / modified 반환
+    print('getList : ', getDirList(modifiedVideoDir))                              #modifiedVideoDir 하위폴더 conan / onepiece / naruto 반환
+    print('getList : ', getDirList(getVideoModifiedDirPath(videos[0])))            #modified/conan/crop의 하위폴더 없음
     print()
-    print (getNthPath(getImageOriginDirPath(videos[0]), 2))
-    print(getNthPath(getImageModifiedDirPath(videos[0]), 2))
+    print (getNthPath(getImageOriginDirPath(videos[0]), 4))                         # original/conan의 n번째 파일 반환
+    print(getNthPath(getImageModifiedDirPath(videos[0]), 2))                         # modified/conan/crop의 n번째 파일 반환
