@@ -10,7 +10,7 @@ originImageDir = os.path.join(imageDir, 'origin')
 modifiedImageDir = os.path.join(imageDir, 'modified')
 
 
-def getVideoOriginDirPath(name):
+def getVideoOriginDirPath(name, option='original'):
     """
     'name'이라는 영상의 Video 폴더
     :param name:
@@ -20,10 +20,15 @@ def getVideoOriginDirPath(name):
      'name'의 원본 비디오 폴더 경로
      Ex) 'Video/origin/conan'
     """
-    return os.path.abspath(os.path.join(originVideoDir,name))
+    ret = os.path.join(originVideoDir, name, option)
+    if (not os.path.exists(ret)):
+        print('not exist option directory')
+        return "None"
+    else:
+        return ret
 
 
-def getVideoModifiedDirPath(name, option='crop'):
+def getVideoModifiedDirPath(name, option='original'):
     """
     'name'이라는 영상의 Image에 변형을 가한 폴더
     :param name:
@@ -44,7 +49,7 @@ def getVideoModifiedDirPath(name, option='crop'):
         return ret
 
 
-def getImageOriginDirPath(name):
+def getImageOriginDirPath(name, option='original'):
     """
     'name'이라는 영상의 Image(frame으로 자른) 폴더
     :param name:
@@ -54,10 +59,15 @@ def getImageOriginDirPath(name):
      'name' 이미지 폴더
      Ex) 'ImageFiles/origin/conan'
     """
-    return os.path.abspath(os.path.join(originImageDir,name))
+    ret = os.path.join(originImageDir, name, option)
+    if (not os.path.exists(ret)):
+        print('not exist option directory')
+        return 'None'
+    else:
+        return ret
 
 
-def getImageModifiedDirPath(name, option='crop'):
+def getImageModifiedDirPath(name, option='original'):
     """
     'name'이라는 영상의 Image에 변형을 가한 폴더
     :param name:
@@ -144,19 +154,26 @@ if __name__ == '__main__':
     print(modifiedVideoDir)
     print()
     print ('getVideoOrigin : ' + getVideoOriginDirPath(videos[0]))                 # videos[0]에 해당하는 origin/conan의 경로
-    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0]))              # videos[0]에 해당하는 modified/conan/crop의 경로
-    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0],'distort'))    # videos[0]에 해당하는 modified/conan/distort의 경로
+    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0]))              # videos[0]에 해당하는 modified/conan/original의 경로
+    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0],'darken'))    # videos[0]에 해당하는 modified/conan/darken의 경로
     print()
     print(originImageDir)
     print(modifiedImageDir)
     print()
-    print('getImageOrigin : ' + getImageOriginDirPath(videos[0]))                #videos[0]에 해당하는 origin/conan의 경로(이미지)
-    print('getImageModified : ' + getVideoModifiedDirPath(videos[0]))            #videos[0]에 해당하는 modified/conan/crop의 경로(이미지)
-    print('getImageModified : ' + getImageModifiedDirPath(videos[0],'distort')) # videos[0]에 해당하는 modified/conan/crop의 경로(이미지)
+    print('getImageOrigin : ' + getImageOriginDirPath(videos[0]))  # videos[0]에 해당하는 origin/conan/original의 경로(이미지)
+    print('getImageOrigin : ' + getImageOriginDirPath(videos[0],'blacknwhite'))  # videos[0]에 해당하는 origin/conan/blacknwhite의 경로(이미지)
+    print('getImageModified : ' + getImageModifiedDirPath(videos[0]))  # videos[0]에 해당하는 modified/conan/original의 경로(이미지)
+    print('getImageModified : ' + getImageModifiedDirPath(videos[0],'invert'))  # videos[0]에 해당하는 modified/conan/invert의 경로(이미지)
     print()
-    print('getList : ', getDirList(videoDir))                                      #videoDir 하위폴더 origin / modified 반환
-    print('getList : ', getDirList(modifiedVideoDir))                              #modifiedVideoDir 하위폴더 conan / onepiece / naruto 반환
-    print('getList : ', getDirList(getVideoModifiedDirPath(videos[0])))            #modified/conan/crop의 하위폴더 없음
+    print('getList : ', getDirList(videoDir))  # videoDir 하위폴더 origin / modified 반환
+    print('getList : ', getDirList(modifiedVideoDir))  # modifiedVideoDir 하위폴더 conan / onepiece / naruto 반환
+    print('getList : ', getDirList(getVideoModifiedDirPath(videos[0])))  # modified/conan/original의 하위폴더 없음
     print()
-    print (getNthPath(getImageOriginDirPath(videos[0]), 4))                         # original/conan의 n번째 파일 반환
-    print(getNthPath(getImageModifiedDirPath(videos[0]), 2))                         # modified/conan/crop의 n번째 파일 반환
+    print(getNthPath(getImageOriginDirPath(videos[0],'blacknwhite'), 3))  # original/conan의 n번째 파일 반환
+    print(getNthPath(getImageModifiedDirPath(videos[0],'blacknwhite'), 1))  # modified/conan/crop의 n번째 파일 반환
+
+    """
+    
+    
+    
+     """
