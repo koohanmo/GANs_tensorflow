@@ -2,12 +2,29 @@ import os
 
 # path variables about video
 videos = ['conan', 'naruto', 'onepiece']
-videoDir = "D:/Project/GANs_tensorflow/Video"
+videoDir = "D:\Project\GANs_tensorflow\Video"
 originVideoDir = os.path.join(videoDir, 'origin')
-modifiedVideoDir = os.path.join(videoDir, 'modified')
-imageDir = "D:/Project/GANs_tensorflow/Image"
+downgradeVideoDir = os.path.join(videoDir, 'downgrade')
+imageDir = "D:\Project\GANs_tensorflow\Image"
 originImageDir = os.path.join(imageDir, 'origin')
-modifiedImageDir = os.path.join(imageDir, 'modified')
+downgradeImageDir = os.path.join(imageDir, 'downgrade')
+
+def setVideoOriginDirPath(name, option='original'):
+    """
+    'name'이라는 영상의 Video 폴더 생성
+    :param name:
+     동영상 이름
+     Ex) conan
+    :return:
+     'name'의 만들어진 option 폴더 경로
+     Ex) 'Video/origin/conan/original'
+    """
+    dirname = os.path.join(originVideoDir, name, option)
+    print(dirname)
+    if not os.path.isdir(os.path.join(originVideoDir, name)):
+        os.mkdir(os.path.join(originVideoDir, name))
+    os.mkdir(dirname)
+    return dirname
 
 
 def getVideoOriginDirPath(name, option='original'):
@@ -28,7 +45,25 @@ def getVideoOriginDirPath(name, option='original'):
         return ret
 
 
-def getVideoModifiedDirPath(name, option='original'):
+def setVideoDowngradeDirPath(name, option='original'):
+    """
+    'name'이라는 영상의 Downgrade Video 폴더 생성
+    :param name:
+     동영상 이름
+     Ex) conan
+    :return:
+     'name'의 만들어진 option 폴더 경로
+     Ex) 'Video/downgrade/conan/original'
+    """
+    dirname = os.path.join(downgradeVideoDir, name, option)
+    print(dirname)
+    if not os.path.isdir(os.path.join(downgradeVideoDir, name)):
+        os.mkdir(os.path.join(downgradeVideoDir, name))
+    os.mkdir(dirname)
+    return dirname
+
+
+def getVideoDowngradeDirPath(name, option='original'):
     """
     'name'이라는 영상의 Image에 변형을 가한 폴더
     :param name:
@@ -39,9 +74,9 @@ def getVideoModifiedDirPath(name, option='original'):
      Ex) crop, rotation, ......etc
     :return:
      'name'의 원본 비디오를 option을 가한 비디오 폴더 경로
-     Ex) 'Video/modified/conan/crop'
+     Ex) 'Video/downgrade/conan/crop'
     """
-    ret = os.path.join(modifiedVideoDir, name,option)
+    ret = os.path.join(downgradeVideoDir, name,option)
     if(not os.path.exists(ret)):
         print('not exist option directory')
         return "None"
@@ -67,7 +102,7 @@ def getImageOriginDirPath(name, option='original'):
         return ret
 
 
-def getImageModifiedDirPath(name, option='original'):
+def getImageDowngradeDirPath(name, option='original'):
     """
     'name'이라는 영상의 Image에 변형을 가한 폴더
     :param name:
@@ -78,9 +113,9 @@ def getImageModifiedDirPath(name, option='original'):
      Ex) crop, rotation, ......etc
     :return:
      'name' 이미지에 option을 가한 이미지 폴더
-     Ex) 'Image/modified/conan/crop'
+     Ex) 'Image/downgrade/conan/crop'
     """
-    ret = os.path.join(modifiedImageDir , name , option )
+    ret = os.path.join(downgradeImageDir , name , option )
     if (not os.path.exists(ret)):
         print('not exist option directory')
         return 'None'
@@ -98,13 +133,23 @@ def getDirList(dir):
      하위 폴더 리스트
      Ex) [Video/modifed, Video/origin]
     """
+    """
+    print(dir)
+    print(os.listdir(dir))
     dirList = [os.path.join(dir,x) for x in os.listdir(dir) if os.path.isdir(x)]
+    """
+    dirList = []
+    for i in (os.listdir(dir)):
+        belowDir = os.path.join(dir, i)
+        if (os.path.isdir(belowDir)):
+            dirList.append(belowDir)
 
     if (not dirList):
         print('no below directories')
         return None
     else:
         return dirList
+
 
 def getFileList(dir):
     """
@@ -122,6 +167,7 @@ def getFileList(dir):
         return None
     else:
         return fileList
+
 
 def getNthPath(dir, nth):
     """
@@ -151,29 +197,25 @@ if __name__ == '__main__':
     print("------path.py------")
     print (videoDir)
     print(originVideoDir)
-    print(modifiedVideoDir)
+    print(downgradeVideoDir)
     print()
     print ('getVideoOrigin : ' + getVideoOriginDirPath(videos[0]))                 # videos[0]에 해당하는 origin/conan의 경로
-    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0]))              # videos[0]에 해당하는 modified/conan/original의 경로
-    print('getVideoModified : ' + getVideoModifiedDirPath(videos[0],'darken'))    # videos[0]에 해당하는 modified/conan/darken의 경로
+    print('getVideoDowngrade : ' + getVideoDowngradeDirPath(videos[0]))              # videos[0]에 해당하는 downgrade/conan/original의 경로
+    print('getVideoDowngrade : ' + getVideoDowngradeDirPath(videos[0],'darken'))    # videos[0]에 해당하는 downgrade/conan/darken의 경로
     print()
     print(originImageDir)
-    print(modifiedImageDir)
+    print(downgradeImageDir)
     print()
     print('getImageOrigin : ' + getImageOriginDirPath(videos[0]))  # videos[0]에 해당하는 origin/conan/original의 경로(이미지)
     print('getImageOrigin : ' + getImageOriginDirPath(videos[0],'blacknwhite'))  # videos[0]에 해당하는 origin/conan/blacknwhite의 경로(이미지)
-    print('getImageModified : ' + getImageModifiedDirPath(videos[0]))  # videos[0]에 해당하는 modified/conan/original의 경로(이미지)
-    print('getImageModified : ' + getImageModifiedDirPath(videos[0],'invert'))  # videos[0]에 해당하는 modified/conan/invert의 경로(이미지)
+    print('getImageDowngrade : ' + getImageDowngradeDirPath(videos[0]))  # videos[0]에 해당하는 downgrade/conan/original의 경로(이미지)
+    print('getImageDowngrade : ' + getImageDowngradeDirPath(videos[0],'invert'))  # videos[0]에 해당하는 downgrade/conan/invert의 경로(이미지)
     print()
-    print('getList : ', getDirList(videoDir))  # videoDir 하위폴더 origin / modified 반환
-    print('getList : ', getDirList(modifiedVideoDir))  # modifiedVideoDir 하위폴더 conan / onepiece / naruto 반환
-    print('getList : ', getDirList(getVideoModifiedDirPath(videos[0])))  # modified/conan/original의 하위폴더 없음
+    print('getList : ', getDirList(videoDir))  # videoDir 하위폴더 origin / downgrade 반환
+    print('getList : ', getDirList(downgradeVideoDir))  # downgradeVideoDir 하위폴더 conan / onepiece / naruto 반환
+    print('getList : ', getDirList(getVideoDowngradeDirPath(videos[0])))  # downgrade/conan/original의 하위폴더 없음
+    print()
+    print('getFileList : ', getFileList(getImageOriginDirPath(videos[0],'blacknwhite')))  # origin/conan/blacknwhite의 하위파일 반환
     print()
     print(getNthPath(getImageOriginDirPath(videos[0],'blacknwhite'), 3))  # original/conan의 n번째 파일 반환
-    print(getNthPath(getImageModifiedDirPath(videos[0],'blacknwhite'), 1))  # modified/conan/crop의 n번째 파일 반환
-
-    """
-    
-    
-    
-     """
+    print(getNthPath(getImageDowngradeDirPath(videos[0],'blacknwhite'), 1))  # downgrade/conan/crop의 n번째 파일 반환
