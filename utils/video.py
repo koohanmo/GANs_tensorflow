@@ -3,6 +3,10 @@ import numpy as np
 from moviepy.editor import *
 import moviepy.video.fx.all as vfx
 import os
+import imageio
+import path as path
+
+editedDir = "D:\Project\GANs_tensorflow\Edited"
 
 """
 If you see an error when you import moviepy.editor:
@@ -11,53 +15,6 @@ NeedDownloadError: Need ffmpeg exe.
 import imageio
 imageio.plugins.ffmpeg.download()
 """
-
-def editVideoCut(filename, opening, ending):
-    """
-    영상에서 오프닝과 엔딩제거
-    :param filename:
-     영상 파일명
-     Ex) FULLMETAL ALCHEMIST-01.avi
-    :param opening:
-     오프닝 종료 시간
-    :param ending:
-     엔딩 시작 시간
-    :return:
-     잘라낸 클립 명
-     Ex) FULLMETAL ALCHEMIST-01_clip.mp4
-    """
-    original = VideoFileClip(filename)
-    print(original.fps)
-    clip = original.subclip(opening, ending)
-    clip_name = filename.split('.')[0] + "_clip.mp4"
-    clip.write_videofile(clip_name)
-    return clip_name
-
-
-def editVideoResize(filename, height, low_height = 90):
-    """
-    영상크기 변환(화질낮추기)
-    :param filename:
-     영상 파일명
-     Ex) FULLMETAL ALCHEMIST-01.avi
-    :param height:
-     영상 세로값
-    :param low_height:
-
-    :return:
-     Resize된 클립 명
-     Ex) E240FULLMETAL ALCHEMIST-01_clip.mp4
-    """
-    width = (height / 3) * 4
-    if(height == 320):
-        low_width = (low_height/3) * 4
-        dummy = VideoFileClip(filename).resize((low_width, low_height))
-        original = dummy.resize( (width, height) )
-    elif(height == 480):
-        original = VideoFileClip(filename).resize((width, height))
-    newFilename = "E" + str(height) + filename
-    original.write_videofile(newFilename)
-    return newFilename
 
 
 def extractFrame(videoname):
@@ -148,16 +105,125 @@ def distort(filename):
     Blueish_clip.write_videofile("BR "+filename)
 
 
+def editVideoCut(filename, opening, ending):
+    """
+    영상에서 오프닝과 엔딩제거
+    :param filename:
+     영상 파일명
+     Ex) FULLMETAL ALCHEMIST-01.avi
+    :param opening:
+     오프닝 종료 시간
+    :param ending:
+     엔딩 시작 시간
+    :return:
+
+     Ex) 
+    """
+    original = VideoFileClip(filename)
+    print(original.fps)
+    clip = original.subclip(opening, ending)
+
+    clip_name = os.path.join(editedDir, os.path.basename(filename).split('.')[0]) + ".mp4"
+    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
+    clip.write_videofile(clip_name)
+    return clip_name
+
+
+def saveOriginVideo(filename,clip, option):
+    """
+        수정된 영상 폴더별 저장 - 원본이 될 애들 (480p)
+        :param filename:
+         영상 파일명
+         Ex) FULLMETAL ALCHEMIST-01.avi
+        :param clip:
+         옵션
+        :param option:
+         옵션
+        :return:
+         편집영상 이름
+         Ex) 
+    """
+    basename = os.path.basename(filename).split('_')[1]
+
+    dirpath = path.getVideoOriginDirPath(basename, option)
+    if not os.path.isdir(dirpath):
+        dirpath = path.setVideoOriginDirPath(basename,option)
+
+    clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
+    clip.write_videofile(clip_name)
+
+    return clip_name
+
+
+def saveDowngradeVideo(filename, clip, option):
+    """
+        수정된 영상 폴더별 저장 - 저화질 애들
+        :param filename:
+         영상 파일명
+         Ex) FULLMETAL ALCHEMIST-01.avi
+        :param clip:
+         옵션
+        :param option:
+         옵션
+        :return:
+         편집영상 이름
+         Ex) 
+    """
+    basename = os.path.basename(filename).split('_')[1]
+
+    dirpath = path.getVideoDowngradeDirPath(basename, option)
+    if not os.path.isdir(dirpath):
+        dirpath = path.setVideoDowngradeDirPath(basename, option)
+
+    clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
+
+    clip.write_videofile(clip_name)
+
+    return clip_name
+
+
+def editVideoResize(filename, height, low_height=90):
+    """
+    영상크기 변환(화질낮추기)
+    :param filename:
+     영상 파일명
+     Ex) FULLMETAL ALCHEMIST-01.avi
+    :param height:
+     영상 세로값
+    :param low_height:
+
+    :return:
+     Resize된 클립 명
+     Ex) E240FULLMETAL ALCHEMIST-01.mp4
+    """
+    newFilename = str(height) + "_" + os.path.basename(filename).split('.')[0] + ".mp4"
+
+    width = (height / 3) * 4
+    if (height == 320):
+        low_width = (low_height / 3) * 4
+        resized = VideoFileClip(filename).resize((low_width, low_height)).resize((width, height))
+        clip_name = saveDowngradeVideo(newFilename, resized, 'original')
+    elif (height == 480):
+        resized = VideoFileClip(filename).resize((width, height))
+        clip_name = saveOriginVideo(newFilename, resized, 'original')
+
+    return clip_name
 
 if __name__ == '__main__':
-    filename = "input_video.avi"
+    imageio.plugins.ffmpeg.download()
+    filename = "E:\metalalchemist_01.avi"
+    filename2 = "E:\metalalchemist_01.mp4"
     opening = '00:00:00'
     ending = '00:01:00'
-
+    extractVideoFilename = editVideoCut(filename, opening=opening, ending=ending)  # 영상자르기 후 Edited에 저장
+    editVideoResize(extractVideoFilename, 320)  # 영상resize 후 origin - catoon - original에 저장
+    editVideoResize(extractVideoFilename, 480)  # 영상resize 후 downgrade - catoon - original에 저장
+"""
     extractVideoFilename = editVideoCut(filename, opening = opening, ending = ending) #영상자르기
-    editVideoResize(extractVideoFilename, 480)  #영상resize
-    editVideoResize(extractVideoFilename, 320)  #영상resize
+    
+    
 
     extractFrame('E320input_video_clip.mp4')    #영상 프레임추출
     extractFrame('E480input_video_clip.mp4')    #영상 프레임추출
     distort('E320input_video_clip.mp4')         #영상 변형
+"""
