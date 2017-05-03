@@ -3,6 +3,8 @@ import numpy as np
 from moviepy.editor import *
 import moviepy.video.fx.all as vfx
 import os
+import imageio
+import path as path
 
 """
 If you see an error when you import moviepy.editor:
@@ -11,6 +13,29 @@ NeedDownloadError: Need ffmpeg exe.
 import imageio
 imageio.plugins.ffmpeg.download()
 """
+
+def saveVideo(filename,clip, option):
+    """
+        수정된 영상 폴더별 저장
+        :param filename:
+         영상 파일명
+         Ex) FULLMETAL ALCHEMIST-01.avi
+        :param option:
+         옵션
+        :param option:
+         옵션
+        :return:
+         저장여부
+         Ex) Saved
+    """
+    basename = os.path.basename(filename).split('_')[0]
+    dirpath = path.getVideoOriginDirPath(basename, option)
+    if not os.path.isdir(dirpath):
+        dirpath = path.setVideoOriginDirPath(basename,option)
+
+    clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + "_clip.mp4"
+    clip.write_videofile(clip_name)
+
 
 def editVideoCut(filename, opening, ending):
     """
@@ -29,9 +54,9 @@ def editVideoCut(filename, opening, ending):
     original = VideoFileClip(filename)
     print(original.fps)
     clip = original.subclip(opening, ending)
-    clip_name = filename.split('.')[0] + "_clip.mp4"
-    clip.write_videofile(clip_name)
-    return clip_name
+    saveVideo(filename, clip, 'original')
+
+    return #clip_name
 
 
 def editVideoResize(filename, height, low_height = 90):
@@ -150,10 +175,13 @@ def distort(filename):
 
 
 if __name__ == '__main__':
-    filename = "input_video.avi"
+    imageio.plugins.ffmpeg.download()
+    filename = "E:\metalalchemist_01.avi"
     opening = '00:00:00'
     ending = '00:01:00'
-
+    extractVideoFilename = editVideoCut(filename, opening=opening, ending=ending)  # 영상자르기
+    #print (path.getVideoOriginDirPath('conan'))
+"""
     extractVideoFilename = editVideoCut(filename, opening = opening, ending = ending) #영상자르기
     editVideoResize(extractVideoFilename, 480)  #영상resize
     editVideoResize(extractVideoFilename, 320)  #영상resize
@@ -161,3 +189,4 @@ if __name__ == '__main__':
     extractFrame('E320input_video_clip.mp4')    #영상 프레임추출
     extractFrame('E480input_video_clip.mp4')    #영상 프레임추출
     distort('E320input_video_clip.mp4')         #영상 변형
+"""

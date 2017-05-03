@@ -2,12 +2,29 @@ import os
 
 # path variables about video
 videos = ['conan', 'naruto', 'onepiece']
-videoDir = "D:/Project/GANs_tensorflow/Video"
+videoDir = "E:\Project\GANs_tensorflow\Video"
 originVideoDir = os.path.join(videoDir, 'origin')
 modifiedVideoDir = os.path.join(videoDir, 'modified')
-imageDir = "D:/Project/GANs_tensorflow/Image"
+imageDir = "E:\Project\GANs_tensorflow\Image"
 originImageDir = os.path.join(imageDir, 'origin')
 modifiedImageDir = os.path.join(imageDir, 'modified')
+
+def setVideoOriginDirPath(name, option='original'):
+    """
+    'name'이라는 영상의 Video 폴더 생성
+    :param name:
+     동영상 이름
+     Ex) conan
+    :return:
+     'name'의 만들어진 option 폴더 경로
+     Ex) 'Video/origin/conan/original'
+    """
+    dirname = os.path.join(originVideoDir, name, option)
+    print(dirname)
+    if not os.path.isdir(os.path.join(originVideoDir, name)):
+        os.mkdir(os.path.join(originVideoDir, name))
+    os.mkdir(dirname)
+    return dirname
 
 
 def getVideoOriginDirPath(name, option='original'):
@@ -98,7 +115,16 @@ def getDirList(dir):
      하위 폴더 리스트
      Ex) [Video/modifed, Video/origin]
     """
+    """
+    print(dir)
+    print(os.listdir(dir))
     dirList = [os.path.join(dir,x) for x in os.listdir(dir) if os.path.isdir(x)]
+    """
+    dirList = []
+    for i in (os.listdir(dir)):
+        belowDir = os.path.join(dir, i)
+        if (os.path.isdir(belowDir)):
+            dirList.append(belowDir)
 
     if (not dirList):
         print('no below directories')
@@ -169,11 +195,7 @@ if __name__ == '__main__':
     print('getList : ', getDirList(modifiedVideoDir))  # modifiedVideoDir 하위폴더 conan / onepiece / naruto 반환
     print('getList : ', getDirList(getVideoModifiedDirPath(videos[0])))  # modified/conan/original의 하위폴더 없음
     print()
+    print('getFileList : ', getFileList(getImageOriginDirPath(videos[0],'blacknwhite')))  # origin/conan/blacknwhite의 하위파일 반환
+    print()
     print(getNthPath(getImageOriginDirPath(videos[0],'blacknwhite'), 3))  # original/conan의 n번째 파일 반환
     print(getNthPath(getImageModifiedDirPath(videos[0],'blacknwhite'), 1))  # modified/conan/crop의 n번째 파일 반환
-
-    """
-    
-    
-    
-     """
