@@ -9,6 +9,13 @@ imageDir = "D:\Project\GANs_tensorflow\Image"
 originImageDir = os.path.join(imageDir, 'origin')
 downgradeImageDir = os.path.join(imageDir, 'downgrade')
 
+def is_exists(path):
+    if(not os.path.exists(path)):
+        print('not exist directory or file')
+        return None
+    else:
+        return path
+
 def setVideoOriginDirPath(name, option='original'):
     """
     'name'이라는 영상의 Video 폴더 생성
@@ -38,11 +45,12 @@ def getVideoOriginDirPath(name, option='original'):
      Ex) 'Video/origin/conan'
     """
     ret = os.path.join(originVideoDir, name, option)
-    if (not os.path.exists(ret)):
-        print('not exist option directory')
-        return None
-    else:
-        return ret
+    return is_exists(ret)
+    # if (not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def setVideoDowngradeDirPath(name, option='original'):
@@ -77,11 +85,12 @@ def getVideoDowngradeDirPath(name, option='original'):
      Ex) 'Video/downgrade/conan/crop'
     """
     ret = os.path.join(downgradeVideoDir, name,option)
-    if(not os.path.exists(ret)):
-        print('not exist option directory')
-        return "None"
-    else:
-        return ret
+    return is_exists(ret)
+    # if(not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def getImageOriginDirPath(name, option='original'):
@@ -95,11 +104,12 @@ def getImageOriginDirPath(name, option='original'):
      Ex) 'ImageFiles/origin/conan'
     """
     ret = os.path.join(originImageDir, name, option)
-    if (not os.path.exists(ret)):
-        print('not exist option directory')
-        return None
-    else:
-        return ret
+    return is_exists(ret)
+    # if (not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def getImageDowngradeDirPath(name, option='original'):
@@ -116,11 +126,12 @@ def getImageDowngradeDirPath(name, option='original'):
      Ex) 'Image/downgrade/conan/crop'
     """
     ret = os.path.join(downgradeImageDir , name , option )
-    if (not os.path.exists(ret)):
-        print('not exist option directory')
-        return None
-    else:
-        return ret
+    return is_exists(ret)
+    # if (not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def getDirList(dir):
@@ -136,7 +147,7 @@ def getDirList(dir):
     allList = [os.path.join(dir,x) for x in os.listdir(dir)]
     dirList = [x for x in allList if os.path.isdir(x)]
 
-    if (not dirList):
+    if not dirList:
         print('no below directories')
         return None
     else:
@@ -155,7 +166,7 @@ def getFileList(dir):
     """
     allList = [os.path.join(dir, x) for x in os.listdir(dir)]
     fileList = [x for x in allList if not os.path.isdir(x)]
-    if (not fileList):
+    if not fileList:
         print('no below files')
         return None
     else:
@@ -175,12 +186,17 @@ def getNthPath(dir, nth):
      Ex) ImageFiles/origin/conan/frame001.png
     """
     dirList = os.listdir(dir)
-    if(nth<len(dirList)):
-        if (not dirList[nth]):
-            print('no nth file')
-            return 'None'
-        else:
-            return os.path.join(dir,dirList[nth])
+    if nth>=len(dirList):
+        print('no nth file')
+        return None
+    return os.path.join(dir,dirList[nth])
+
+    # if nth<len(dirList):
+    #     if not dirList[nth]:
+    #         print('no nth file')
+    #         return None
+    #     else:
+    #         return os.path.join(dir,dirList[nth])
 
 
 if __name__ == '__main__':
