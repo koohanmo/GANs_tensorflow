@@ -2,10 +2,10 @@ import os
 
 # path variables about video
 videos = ['conan', 'naruto', 'onepiece']
-videoDir = "D:\Project\GANs_tensorflow\Video"
+videoDir = "E:\Project\GANs_tensorflow\Video"
 originVideoDir = os.path.join(videoDir, 'origin')
 downgradeVideoDir = os.path.join(videoDir, 'downgrade')
-imageDir = "D:\Project\GANs_tensorflow\Image"
+imageDir = "E:\Project\GANs_tensorflow\Image"
 originImageDir = os.path.join(imageDir, 'origin')
 downgradeImageDir = os.path.join(imageDir, 'downgrade')
 
@@ -84,6 +84,25 @@ def getVideoDowngradeDirPath(name, option='original'):
         return ret
 
 
+def setImageOriginDirPath(name, option='original'):
+    """
+    'name'이라는 영상의 Image 폴더 생성
+    :param name:
+     동영상 이름
+     Ex) conan
+    :return:
+     'name'의 만들어진 option 폴더 경로
+     Ex) 'Image/origin/conan/original'
+    """
+    dirname = os.path.join(originImageDir, name, option)
+
+    if not os.path.isdir(os.path.join(originImageDir, name)):
+        os.mkdir(os.path.join(originImageDir, name))
+    os.mkdir(dirname)
+
+    return dirname
+
+
 def getImageOriginDirPath(name, option='original'):
     """
     'name'이라는 영상의 Image(frame으로 자른) 폴더
@@ -100,6 +119,26 @@ def getImageOriginDirPath(name, option='original'):
         return 'None'
     else:
         return ret
+
+
+def setImageDowngradeDirPath(name, option='original'):
+    """
+    'name'이라는 영상의 Downgrade Image 폴더 생성
+    :param name:
+     동영상 이름
+     Ex) conan
+    :return:
+     'name'의 만들어진 option 폴더 경로
+     Ex) 'Image/downgrade/conan/original'
+    """
+    dirname = os.path.join(downgradeImageDir, name, option)
+
+    if not os.path.isdir(os.path.join(downgradeImageDir, name)):
+        os.mkdir(os.path.join(downgradeImageDir, name))
+
+    os.mkdir(dirname)
+
+    return dirname
 
 
 def getImageDowngradeDirPath(name, option='original'):
