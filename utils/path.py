@@ -88,7 +88,8 @@ def getDirList(dir):
      하위 폴더 리스트
      Ex) [Video/modifed, Video/origin]
     """
-    dirList = [os.path.join(dir,x) for x in os.listdir(dir) if os.path.isdir(x)]
+    allList = [os.path.join(dir,x) for x in os.listdir(dir)]
+    dirList = [x for x in allList if os.path.isdir(x)]
 
     if (not dirList):
         print('no below directories')
@@ -106,7 +107,8 @@ def getFileList(dir):
      하위 폴더 리스트
      Ex) [Video/origin/conan/01.mp4, Video/origin/conan/02.mp4]
     """
-    fileList = [os.path.join(dir,x) for x in os.listdir(dir) if not os.path.isdir(x)]
+    allList = [os.path.join(dir, x) for x in os.listdir(dir)]
+    fileList = [x for x in allList if not os.path.isdir(x)]
     if (not fileList):
         print('no below files')
         return None
@@ -138,6 +140,8 @@ if __name__ == '__main__':
     """
     Test code...
     """
+    print(getDirList(videoDir))
+    print(getFileList(getVideoOriginDirPath('conan')))
     print("------path.py------")
     print (videoDir)
     print(originVideoDir)
