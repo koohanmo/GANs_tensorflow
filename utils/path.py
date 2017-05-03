@@ -2,12 +2,19 @@ import os
 
 # path variables about video
 videos = ['conan', 'naruto', 'onepiece']
-videoDir = "E:\Project\GANs_tensorflow\Video"
+videoDir = "D:/Project/GANs_tensorflow/Video"
 originVideoDir = os.path.join(videoDir, 'origin')
 downgradeVideoDir = os.path.join(videoDir, 'downgrade')
-imageDir = "E:\Project\GANs_tensorflow\Image"
+imageDir = "D:\Project\GANs_tensorflow\Image"
 originImageDir = os.path.join(imageDir, 'origin')
 downgradeImageDir = os.path.join(imageDir, 'downgrade')
+
+def is_exists(path):
+    if(not os.path.exists(path)):
+        print('not exist directory or file')
+        return None
+    else:
+        return path
 
 def setVideoOriginDirPath(name, option='original'):
     """
@@ -38,11 +45,12 @@ def getVideoOriginDirPath(name, option='original'):
      Ex) 'Video/origin/conan'
     """
     ret = os.path.join(originVideoDir, name, option)
-    if (not os.path.exists(ret)):
-        print('not exist option directory')
-        return "None"
-    else:
-        return ret
+    return is_exists(ret)
+    # if (not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def setVideoDowngradeDirPath(name, option='original'):
@@ -77,11 +85,12 @@ def getVideoDowngradeDirPath(name, option='original'):
      Ex) 'Video/downgrade/conan/crop'
     """
     ret = os.path.join(downgradeVideoDir, name,option)
-    if(not os.path.exists(ret)):
-        print('not exist option directory')
-        return "None"
-    else:
-        return ret
+    return is_exists(ret)
+    # if(not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def setImageOriginDirPath(name, option='original'):
@@ -114,11 +123,12 @@ def getImageOriginDirPath(name, option='original'):
      Ex) 'ImageFiles/origin/conan'
     """
     ret = os.path.join(originImageDir, name, option)
-    if (not os.path.exists(ret)):
-        print('not exist option directory')
-        return 'None'
-    else:
-        return ret
+    return is_exists(ret)
+    # if (not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def setImageDowngradeDirPath(name, option='original'):
@@ -155,11 +165,12 @@ def getImageDowngradeDirPath(name, option='original'):
      Ex) 'Image/downgrade/conan/crop'
     """
     ret = os.path.join(downgradeImageDir , name , option )
-    if (not os.path.exists(ret)):
-        print('not exist option directory')
-        return 'None'
-    else:
-        return ret
+    return is_exists(ret)
+    # if (not os.path.exists(ret)):
+    #     print('not exist option directory')
+    #     return None
+    # else:
+    #     return ret
 
 
 def getDirList(dir):
@@ -172,18 +183,10 @@ def getDirList(dir):
      하위 폴더 리스트
      Ex) [Video/modifed, Video/origin]
     """
-    """
-    print(dir)
-    print(os.listdir(dir))
-    dirList = [os.path.join(dir,x) for x in os.listdir(dir) if os.path.isdir(x)]
-    """
-    dirList = []
-    for i in (os.listdir(dir)):
-        belowDir = os.path.join(dir, i)
-        if (os.path.isdir(belowDir)):
-            dirList.append(belowDir)
+    allList = [os.path.join(dir,x) for x in os.listdir(dir)]
+    dirList = [x for x in allList if os.path.isdir(x)]
 
-    if (not dirList):
+    if not dirList:
         print('no below directories')
         return None
     else:
@@ -200,8 +203,9 @@ def getFileList(dir):
      하위 폴더 리스트
      Ex) [Video/origin/conan/01.mp4, Video/origin/conan/02.mp4]
     """
-    fileList = [os.path.join(dir,x) for x in os.listdir(dir) if not os.path.isdir(x)]
-    if (not fileList):
+    allList = [os.path.join(dir, x) for x in os.listdir(dir)]
+    fileList = [x for x in allList if not os.path.isdir(x)]
+    if not fileList:
         print('no below files')
         return None
     else:
@@ -221,12 +225,17 @@ def getNthPath(dir, nth):
      Ex) ImageFiles/origin/conan/frame001.png
     """
     dirList = os.listdir(dir)
-    if(nth<len(dirList)):
-        if (not dirList[nth]):
-            print('no nth file')
-            return 'None'
-        else:
-            return os.path.join(dir,dirList[nth])
+    if nth>=len(dirList):
+        print('no nth file')
+        return None
+    return os.path.join(dir,dirList[nth])
+
+    # if nth<len(dirList):
+    #     if not dirList[nth]:
+    #         print('no nth file')
+    #         return None
+    #     else:
+    #         return os.path.join(dir,dirList[nth])
 
 
 if __name__ == '__main__':

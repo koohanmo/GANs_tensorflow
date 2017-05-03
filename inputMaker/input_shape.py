@@ -2,13 +2,27 @@ import numpy as np
 from utils import image
 
 class ImageSetWithoutLable(object):
+    """
+    Lable이 없는 이미지데이터셋
+    """
     def __init__(self,
                  images,
                  normalize=False,
                  serialize=False,
                  dtype=np.float32,
                  shuffle=True):
-
+        """
+        :param images:
+         데이터셋의 이미지들
+        :param normalize: 
+         0~1로 정규화 할 것인지
+        :param serialize: 
+         [W,H,Ch] -> [W*H*Ch], 1열로 만들 것인지
+        :param dtype: 
+         이미지의 Data type
+        :param shuffle: 
+         데이터들의 순서를 섞을 것인지
+        """
         images = images.astype(dtype)
         if serialize:
             # [num_examples, rows, columns, depth] -> [num_examples, rows*columns*depth]
@@ -25,6 +39,13 @@ class ImageSetWithoutLable(object):
         self._index_in_epoch = 0
 
     def next_batch(self, batch_size):
+        """
+        학습 시, Batch_size 만큼 옵션에 맞추어서 데이터를 반환
+        :param batch_size:
+         이번에 사용향 batch크기
+        :return: 
+         batch 크기의 이미지 데이터(np.array)
+        """
         assert batch_size <= self._num_examples, (
             "batch_size : %s num_examples : %s" % (batch_size,
                                                    self._num_examples))
@@ -47,6 +68,9 @@ class ImageSetWithoutLable(object):
 
 
 class ImageSetWithLabel(object):
+    """
+    이미지 데이터 셋
+    """
     def __init__(self,
                  images,
                  labels,
@@ -54,7 +78,20 @@ class ImageSetWithLabel(object):
                  serialize=False,
                  dtype=np.float32,
                  shuffle=True):
-
+        """
+        :param images:
+         데이터셋의 이미지들
+        :param labels:
+         데이터셋의 Label들
+        :param normalize: 
+         0~1로 정규화 할 것인지
+        :param serialize: 
+         [W,H,Ch] -> [W*H*Ch], 1열로 만들 것인지
+        :param dtype: 
+         이미지의 Data type
+        :param shuffle: 
+         데이터들의 순서를 섞을 것인지 
+        """
         assert images.shape[0] == labels.shape[0], (
             "images.shape: %s labels.shape: %s" % (images.shape,
                                                    labels.shape))
@@ -74,6 +111,13 @@ class ImageSetWithLabel(object):
         self._index_in_epoch = 0
 
     def next_batch(self, batch_size):
+        """
+        학습 시, Batch_size 만큼 옵션에 맞추어서 데이터를 반환
+        :param batch_size:
+         이번에 사용향 batch크기
+        :return: 
+         batch 크기의 이미지 데이터(np.array), 이미지 Label(np.array)
+        """
         assert batch_size <= self._num_examples, (
             "batch_size : %s num_examples : %s" % (batch_size,
                                                    self._num_examples))
@@ -97,6 +141,11 @@ class ImageSetWithLabel(object):
 
 
 class ImagePathSetWithLable(object):
+    """
+    이미지의 Path만 저장하고 있다가 
+    next_batch 실행시에 이미지를 불러와서 사용
+    (ImageSet 클래스들은 모든 이미지를 np.array에 들고 있음)
+    """
     def __init__(self,
                  paths,
                  labels,
@@ -104,7 +153,20 @@ class ImagePathSetWithLable(object):
                  serialize=False,
                  dtype=np.float32,
                  shuffle=True):
-
+        """
+        :param paths:
+         데이터셋의 이미지 path들
+        :param labels:
+         데이터셋의 Label들
+        :param normalize: 
+         0~1로 정규화 할 것인지
+        :param serialize: 
+         [W,H,Ch] -> [W*H*Ch], 1열로 만들 것인지
+        :param dtype: 
+         이미지의 Data type
+        :param shuffle: 
+         데이터들의 순서를 섞을 것인지 
+        """
         self._normalize = normalize
         self._serialize = serialize
         self._dtype = dtype
@@ -116,6 +178,13 @@ class ImagePathSetWithLable(object):
         self._index_in_epoch = 0
 
     def next_batch(self, batch_size):
+        """
+        학습 시, Batch_size 만큼 옵션에 맞추어서 데이터를 반환
+        :param batch_size:
+         이번에 사용향 batch크기
+        :return: 
+         batch 크기의 이미지 데이터(np.array), 이미지 Label(np.array)
+        """
         assert batch_size <= self._num_examples, (
             "batch_size : %s num_examples : %s" % (batch_size,
                                                    self._num_examples))
@@ -133,9 +202,9 @@ class ImagePathSetWithLable(object):
 
             start = 0
             self._index_in_epoch = batch_size
-
         end = self._index_in_epoch
 
+        # 이미지 로딩, 처리
         temp_images=[image.image_path_to_np(x) for x in self._images[start:end]]
         temp_images=np.array(temp_images)
 
@@ -152,6 +221,11 @@ class ImagePathSetWithLable(object):
 
 
 class ImagePathSetWithoutLable(object):
+    """
+    이미지의 Path만 저장하고 있다가 
+    next_batch 실행시에 이미지를 불러와서 사용
+    (ImageSet 클래스들은 모든 이미지를 np.array에 들고 있음)
+    """
     def __init__(self,
                  paths,
                  normalize=False,
@@ -169,6 +243,13 @@ class ImagePathSetWithoutLable(object):
         self._index_in_epoch = 0
 
     def next_batch(self, batch_size):
+        """
+        학습 시, Batch_size 만큼 옵션에 맞추어서 데이터를 반환
+        :param batch_size:
+         이번에 사용향 batch크기
+        :return: 
+         batch 크기의 이미지 데이터(np.array)
+        """
         assert batch_size <= self._num_examples, (
             "batch_size : %s num_examples : %s" % (batch_size,
                                                    self._num_examples))
