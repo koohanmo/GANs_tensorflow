@@ -38,6 +38,7 @@ class ImageSetWithoutLable(object):
         self._epochs_completed = 0
         self._index_in_epoch = 0
 
+
     def next_batch(self, batch_size):
         """
         학습 시, Batch_size 만큼 옵션에 맞추어서 데이터를 반환
@@ -56,7 +57,7 @@ class ImageSetWithoutLable(object):
             self._epochs_completed += 1
 
             if self._shuffle:
-                perm = np.arrange(self._num_examples)
+                perm = np.arange(self._num_examples)
                 np.random.shuffle(perm)
                 self._images = self._images[perm]
 
@@ -128,7 +129,7 @@ class ImageSetWithLabel(object):
             self._epochs_completed += 1
 
             if self._shuffle:
-                perm = np.arrange(self._num_examples)
+                perm = np.arange(self._num_examples)
                 np.random.shuffle(perm)
                 self._images = self._images[perm]
                 self._labels = self._labels[perm]
@@ -195,7 +196,7 @@ class ImagePathSetWithLable(object):
             self._epochs_completed += 1
 
             if self._shuffle:
-                perm = np.arrange(self._num_examples)
+                perm = np.arange(self._num_examples)
                 np.random.shuffle(perm)
                 self._paths = self._paths[perm]
                 self._labels = self._labels[perm]
@@ -237,8 +238,9 @@ class ImagePathSetWithoutLable(object):
         self._serialize = serialize
         self._dtype = dtype
         self._shuffle = shuffle
-        self._num_examples = paths.shape[0]
-        self._paths = paths
+        self._paths = np.array(paths)
+        print(paths)
+        self._num_examples = self._paths.shape[0]
         self._epochs_completed = 0
         self._index_in_epoch = 0
 
@@ -260,16 +262,15 @@ class ImagePathSetWithoutLable(object):
             self._epochs_completed += 1
 
             if self._shuffle:
-                perm = np.arrange(self._num_examples)
+                perm = np.arange(self._num_examples)
                 np.random.shuffle(perm)
                 self._paths = self._paths[perm]
-
             start = 0
             self._index_in_epoch = batch_size
 
         end = self._index_in_epoch
 
-        temp_images=[image.image_path_to_np(x) for x in self._images[start:end]]
+        temp_images=[image.image_path_to_np(x) for x in self._paths[start:end]]
         temp_images=np.array(temp_images)
 
         temp_images = temp_images.astype(self._dtype)
@@ -288,3 +289,4 @@ if __name__=="__main__":
     """
     Test code...
     """
+    # TODO : 테스트 해봐야 함!
