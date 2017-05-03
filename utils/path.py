@@ -45,6 +45,24 @@ def getVideoOriginDirPath(name, option='original'):
         return ret
 
 
+def setVideoDowngradeDirPath(name, option='original'):
+    """
+    'name'이라는 영상의 Downgrade Video 폴더 생성
+    :param name:
+     동영상 이름
+     Ex) conan
+    :return:
+     'name'의 만들어진 option 폴더 경로
+     Ex) 'Video/downgrade/conan/original'
+    """
+    dirname = os.path.join(downgradeVideoDir, name, option)
+    print(dirname)
+    if not os.path.isdir(os.path.join(downgradeVideoDir, name)):
+        os.mkdir(os.path.join(downgradeVideoDir, name))
+    os.mkdir(dirname)
+    return dirname
+
+
 def getVideoDowngradeDirPath(name, option='original'):
     """
     'name'이라는 영상의 Image에 변형을 가한 폴더
