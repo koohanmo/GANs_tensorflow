@@ -12,7 +12,7 @@ downgradeImageDir = os.path.join(imageDir, 'downgrade')
 def is_exists(path):
     if(not os.path.exists(path)):
         print('not exist directory or file')
-        return None
+        return 'None'
     else:
         return path
 
