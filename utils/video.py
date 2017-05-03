@@ -6,7 +6,7 @@ import os
 import imageio
 import path as path
 
-editedDir = "E:\Project\GANs_tensorflow\Edited"
+editedDir = "D:\Project\GANs_tensorflow\Edited"
 
 """
 If you see an error when you import moviepy.editor:
