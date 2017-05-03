@@ -6,7 +6,7 @@ import os
 import imageio
 import path as path
 
-editedDir = "D:\Project\GANs_tensorflow\Edited"
+editedDir = "E:\Project\GANs_tensorflow\Edited"
 
 """
 If you see an error when you import moviepy.editor:
@@ -17,18 +17,6 @@ imageio.plugins.ffmpeg.download()
 """
 
 
-def extractFrame(videoname):
-    """
-    영상에서 프레임 추출
-    :param videoname:
-     영상 파일명
-     Ex) FULLMETAL ALCHEMIST-01.avi
-    """
-    vertical_flip = lambda frame: frame[::] # rotate 180 [::-1]
-    clip = VideoFileClip(videoname)
-    if(not os.path.exists(videoname.split('.')[0])):
-        os.makedirs(videoname.split('.')[0])
-    clip.fl_image(vertical_flip).to_images_sequence(videoname.split('.')[0]+"/iamges%05d.jpeg")
 
 
 # 안씀 보류 #
@@ -65,7 +53,7 @@ def invert_blue(image):
     return image[:,:,[1,0,2]]
 
 
-def distort(filename):
+def distort(filename, option=0):
     """
     영상 변형
      - 흑백
@@ -80,29 +68,31 @@ def distort(filename):
      - 파란색화
     :param filename:
      영상 파일명
+    :param option:
+     origin(0) downgrade(1) 구분
     """
+    header_list = ['BW', 'DK', 'IV', 'LR', 'UD', 'FL', 'LC', 'GR', 'RD', 'BL']
+    option_list = ['blacknwhite', 'darken', 'invert', 'lrflip', 'udflip', 'lrudflip','lumcon','greenish','reddish', 'blueish']
+    clip_list = []
     original = VideoFileClip(filename)
-    BlacknWhite_clip = original.fx(vfx.blackwhite)
-    Daken_clip = original.fx(vfx.colorx, 0.3)
-    Invert_clip = original.fx(vfx.invert_colors)
-    LRflip_clip = original.fx(vfx.mirror_x)
-    UDflip_clip = original.fx(vfx.mirror_y)
-    LRUDflip_clip = LRflip_clip.fx(vfx.mirror_y)
-    LumCon_clip = original.fx(vfx.lum_contrast,100)
-    Grennish_clip = original.fl_image(invert_green)
-    Reddish_clip = original.fl_image(invert_red)
-    Blueish_clip = original.fl_image(invert_blue)
+    clip_list.append(original.fx(vfx.blackwhite))
+    clip_list.append(original.fx(vfx.colorx, 0.3))
+    clip_list.append(original.fx(vfx.invert_colors))
+    clip_list.append(original.fx(vfx.mirror_x))
+    clip_list.append(original.fx(vfx.mirror_y))
+    clip_list.append(clip_list[4].fx(vfx.mirror_y))
+    clip_list.append(original.fx(vfx.lum_contrast, 100))
+    clip_list.append(original.fl_image(invert_green))
+    clip_list.append(original.fl_image(invert_red))
+    clip_list.append(original.fl_image(invert_blue))
 
-    BlacknWhite_clip.write_videofile("BW "+filename)
-    Daken_clip.write_videofile("DK "+filename)
-    Invert_clip.write_videofile("IV "+filename)
-    LRflip_clip.write_videofile("LR "+filename)
-    LRUDflip_clip.write_videofile("FL "+filename)
-    UDflip_clip.write_videofile("UD "+filename)
-    LumCon_clip.write_videofile("LC "+filename)
-    Grennish_clip.write_videofile("GR "+filename)
-    Reddish_clip.write_videofile("RD "+filename)
-    Blueish_clip.write_videofile("BR "+filename)
+    for clipIdx in range(len(clip_list)):
+        newFilename = header_list[clipIdx] + os.path.basename(filename).split('.')[0] + ".mp4"
+        print(newFilename)
+        if option==0:
+            clip_name = saveOriginVideo(newFilename, clip_list[clipIdx], option_list[clipIdx])
+        else:
+            clip_name = saveDowngradeVideo(newFilename, clip_list[clipIdx], option_list[clipIdx])
 
 
 def editVideoCut(filename, opening, ending):
@@ -125,7 +115,7 @@ def editVideoCut(filename, opening, ending):
 
     clip_name = os.path.join(editedDir, os.path.basename(filename).split('.')[0]) + ".mp4"
     # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
-    clip.write_videofile(clip_name)
+    # clip.write_videofile(clip_name)
     return clip_name
 
 
@@ -150,6 +140,8 @@ def saveOriginVideo(filename,clip, option):
         dirpath = path.setVideoOriginDirPath(basename,option)
 
     clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
+    print(clip_name)
+    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
     clip.write_videofile(clip_name)
 
     return clip_name
@@ -176,7 +168,7 @@ def saveDowngradeVideo(filename, clip, option):
         dirpath = path.setVideoDowngradeDirPath(basename, option)
 
     clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
-
+    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
     clip.write_videofile(clip_name)
 
     return clip_name
@@ -209,21 +201,54 @@ def editVideoResize(filename, height, low_height=90):
 
     return clip_name
 
+
+def extractOriginFrame(videoname, option):
+    """
+    Origin 영상에서 프레임 추출
+    :param videoname:
+     영상 파일명
+     Ex) FULLMETAL ALCHEMIST-01.avi
+    """
+    basename = os.path.basename(videoname).split('_')[1]
+    dirpath = path.getImageOriginDirPath(basename, option)
+
+    if not os.path.isdir(dirpath):
+        dirpath = path.setImageOriginDirPath(basename, option)
+
+    vertical_flip = lambda frame: frame[::]  # rotate 180 [::-1]
+    clip = VideoFileClip(videoname)
+    clip.fl_image(vertical_flip).to_images_sequence(dirpath + "/iamges%05d.jpeg")
+
+
+def extractDowngradeFrame(videoname, option):
+    """
+    Downgrade 영상에서 프레임 추출
+    :param videoname:
+     영상 파일명
+     Ex) FULLMETAL ALCHEMIST-01.avi
+    """
+
+    basename = os.path.basename(videoname).split('_')[1]
+    print(basename)
+    dirpath = path.getImageDowngradeDirPath(basename, option)
+    if not os.path.isdir(dirpath):
+        dirpath = path.setImageDowngradeDirPath(basename, option)
+
+    vertical_flip = lambda frame: frame[::]  # rotate 180 [::-1]
+    clip = VideoFileClip(videoname)
+    clip.fl_image(vertical_flip).to_images_sequence(dirpath + "/iamges%05d.jpeg")
+
+
 if __name__ == '__main__':
     imageio.plugins.ffmpeg.download()
     filename = "E:\metalalchemist_01.avi"
-    filename2 = "E:\metalalchemist_01.mp4"
     opening = '00:00:00'
     ending = '00:01:00'
     extractVideoFilename = editVideoCut(filename, opening=opening, ending=ending)  # 영상자르기 후 Edited에 저장
-    editVideoResize(extractVideoFilename, 320)  # 영상resize 후 origin - catoon - original에 저장
-    editVideoResize(extractVideoFilename, 480)  # 영상resize 후 downgrade - catoon - original에 저장
-"""
-    extractVideoFilename = editVideoCut(filename, opening = opening, ending = ending) #영상자르기
-    
-    
+    downgradeOriginal = editVideoResize(extractVideoFilename, 320)  # 영상resize 후 origin - catoon - original에 저장
+    #extractDowngradeFrame(downgradeOriginal, 'original')  # downgrade영상의 프레임추출
+    distort(downgradeOriginal, 1)  # downgrade원본 영상 변형
 
-    extractFrame('E320input_video_clip.mp4')    #영상 프레임추출
-    extractFrame('E480input_video_clip.mp4')    #영상 프레임추출
-    distort('E320input_video_clip.mp4')         #영상 변형
-"""
+    #originOriginal = editVideoResize(extractVideoFilename, 480)  # 영상resize 후 downgrade - catoon - original에 저장
+    #extractOriginFrame(originOriginal, 'original')  # original영상의 프레임추출
+    #distort(originOriginal, 0)  # original원본 영상 변형
