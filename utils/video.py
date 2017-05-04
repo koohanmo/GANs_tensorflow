@@ -141,8 +141,9 @@ def saveOriginVideo(filename,clip, option):
 
     clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
     print(clip_name)
-    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
-    clip.write_videofile(clip_name)
+
+    if not os.path.exists(clip_name):
+        clip.write_videofile(clip_name)
 
     return clip_name
 
@@ -168,8 +169,9 @@ def saveDowngradeVideo(filename, clip, option):
         dirpath = path.setVideoDowngradeDirPath(basename, option)
 
     clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
-    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
-    clip.write_videofile(clip_name)
+
+    if not os.path.exists(clip_name):
+        clip.write_videofile(clip_name)
 
     return clip_name
 
@@ -245,10 +247,10 @@ if __name__ == '__main__':
     opening = '00:00:00'
     ending = '00:01:00'
     extractVideoFilename = editVideoCut(filename, opening=opening, ending=ending)  # 영상자르기 후 Edited에 저장
-    downgradeOriginal = editVideoResize(extractVideoFilename, 320)  # 영상resize 후 origin - catoon - original에 저장
+    downgradeOriginal = editVideoResize(extractVideoFilename, 320)  # 영상resize 후 downgrade - catoon - original에 저장
     #extractDowngradeFrame(downgradeOriginal, 'original')  # downgrade영상의 프레임추출
     distort(downgradeOriginal, 1)  # downgrade원본 영상 변형
 
-    #originOriginal = editVideoResize(extractVideoFilename, 480)  # 영상resize 후 downgrade - catoon - original에 저장
+    #originOriginal = editVideoResize(extractVideoFilename, 480)  # 영상resize 후 origin - catoon - original에 저장
     #extractOriginFrame(originOriginal, 'original')  # original영상의 프레임추출
     #distort(originOriginal, 0)  # original원본 영상 변형
