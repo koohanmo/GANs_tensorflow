@@ -6,7 +6,9 @@ import os
 import imageio
 import path as path
 
-editedDir = "E:\Project\GANs_tensorflow\Edited"
+editedDir = "D:\Project\GANs_tensorflow\Edited"
+header_list = ['BW', 'DK', 'IV', 'LR', 'UD', 'FL', 'LC', 'GR', 'RD', 'BL']
+option_list = ['blacknwhite', 'darken', 'invert', 'lrflip', 'udflip', 'lrudflip','lumcon','greenish','reddish', 'blueish']
 
 """
 If you see an error when you import moviepy.editor:
@@ -15,8 +17,6 @@ NeedDownloadError: Need ffmpeg exe.
 import imageio
 imageio.plugins.ffmpeg.download()
 """
-
-
 
 
 # 안씀 보류 #
@@ -71,8 +71,6 @@ def distort(filename, option=0):
     :param option:
      origin(0) downgrade(1) 구분
     """
-    header_list = ['BW', 'DK', 'IV', 'LR', 'UD', 'FL', 'LC', 'GR', 'RD', 'BL']
-    option_list = ['blacknwhite', 'darken', 'invert', 'lrflip', 'udflip', 'lrudflip','lumcon','greenish','reddish', 'blueish']
     clip_list = []
     original = VideoFileClip(filename)
     clip_list.append(original.fx(vfx.blackwhite))
@@ -115,7 +113,7 @@ def editVideoCut(filename, opening, ending):
 
     clip_name = os.path.join(editedDir, os.path.basename(filename).split('.')[0]) + ".mp4"
     # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
-    # clip.write_videofile(clip_name)
+    clip.write_videofile(clip_name)
     return clip_name
 
 
@@ -141,9 +139,12 @@ def saveOriginVideo(filename,clip, option):
 
     clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
     print(clip_name)
-    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
-    clip.write_videofile(clip_name)
 
+    if not os.path.exists(clip_name):
+        print("Making...")
+        clip.write_videofile(clip_name)
+    else:
+        print("Already Exist")
     return clip_name
 
 
@@ -168,9 +169,12 @@ def saveDowngradeVideo(filename, clip, option):
         dirpath = path.setVideoDowngradeDirPath(basename, option)
 
     clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
-    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
-    clip.write_videofile(clip_name)
 
+    if not os.path.exists(clip_name):
+        print("Making...")
+        clip.write_videofile(clip_name)
+    else:
+        print("Already Exist")
     return clip_name
 
 
@@ -202,12 +206,16 @@ def editVideoResize(filename, height, low_height=90):
     return clip_name
 
 
-def extractOriginFrame(videoname, option):
+def setImageOriginPath(videoname, option):
     """
-    Origin 영상에서 프레임 추출
-    :param videoname:
-     영상 파일명
-     Ex) FULLMETAL ALCHEMIST-01.avi
+        Origin 영상에서 프레임 추출시 경로
+        :param videoname:
+         영상 파일명
+         Ex) FULLMETAL ALCHEMIST-01.avi
+        :param option:
+         변형방식
+        :return dirpath:
+         경로 반환
     """
     basename = os.path.basename(videoname).split('_')[1]
     dirpath = path.getImageOriginDirPath(basename, option)
@@ -215,40 +223,87 @@ def extractOriginFrame(videoname, option):
     if not os.path.isdir(dirpath):
         dirpath = path.setImageOriginDirPath(basename, option)
 
-    vertical_flip = lambda frame: frame[::]  # rotate 180 [::-1]
-    clip = VideoFileClip(videoname)
-    clip.fl_image(vertical_flip).to_images_sequence(dirpath + "/iamges%05d.jpeg")
+    dirpath = os.path.join(dirpath, os.path.basename(videoname).split('.')[0])
+
+    return dirpath
 
 
-def extractDowngradeFrame(videoname, option):
+def setImageDowngradePath(videoname, option):
     """
-    Downgrade 영상에서 프레임 추출
-    :param videoname:
-     영상 파일명
-     Ex) FULLMETAL ALCHEMIST-01.avi
+        Downgrade 영상에서 프레임 추출시 경로
+        :param videoname:
+         영상 파일명
+         Ex) FULLMETAL ALCHEMIST-01.avi
+        :param option:
+         변형방식
+        :return dirpath:
+         경로 반환
     """
-
     basename = os.path.basename(videoname).split('_')[1]
-    print(basename)
     dirpath = path.getImageDowngradeDirPath(basename, option)
+
     if not os.path.isdir(dirpath):
         dirpath = path.setImageDowngradeDirPath(basename, option)
 
-    vertical_flip = lambda frame: frame[::]  # rotate 180 [::-1]
-    clip = VideoFileClip(videoname)
-    clip.fl_image(vertical_flip).to_images_sequence(dirpath + "/iamges%05d.jpeg")
+    dirpath = os.path.join(dirpath, os.path.basename(videoname).split('.')[0])
+
+    return dirpath
+
+
+def extractFrame(videoname, option, version):
+    """
+    Origin 영상에서 프레임 추출
+    :param videoname:
+     영상 파일명
+     Ex) FULLMETAL ALCHEMIST-01.avi
+    :param option:
+     변형방식
+    :param version:
+     origin(0) downgrade(1)
+    """
+    if version==0:
+        dirpath = setImageOriginPath(videoname, option)
+    else:
+        dirpath = setImageDowngradePath(videoname, option)
+
+    print(dirpath)
+    if not os.path.exists(dirpath+"_images00000.jpeg"):
+        print('Making...')
+        vertical_flip = lambda frame: frame[::]  # rotate 180 [::-1]
+        clip = VideoFileClip(videoname)
+        clip.fl_image(vertical_flip).to_images_sequence(dirpath + "_images%05d.jpeg")
+    else:
+        print('Already Exist')
 
 
 if __name__ == '__main__':
     imageio.plugins.ffmpeg.download()
-    filename = "E:\metalalchemist_01.avi"
+    filename = "D:\metalalchemist_01.avi"
     opening = '00:00:00'
     ending = '00:01:00'
     extractVideoFilename = editVideoCut(filename, opening=opening, ending=ending)  # 영상자르기 후 Edited에 저장
-    downgradeOriginal = editVideoResize(extractVideoFilename, 320)  # 영상resize 후 origin - catoon - original에 저장
-    #extractDowngradeFrame(downgradeOriginal, 'original')  # downgrade영상의 프레임추출
-    distort(downgradeOriginal, 1)  # downgrade원본 영상 변형
 
-    #originOriginal = editVideoResize(extractVideoFilename, 480)  # 영상resize 후 downgrade - catoon - original에 저장
-    #extractOriginFrame(originOriginal, 'original')  # original영상의 프레임추출
-    #distort(originOriginal, 0)  # original원본 영상 변형
+    # originOriginal = editVideoResize(extractVideoFilename, 480)  # 영상resize 후 origin - catoon - original에 저장
+    # distort(originOriginal, 0)  # original원본 영상 변형
+
+    #downgradeOriginal = editVideoResize(extractVideoFilename, 320)  # 영상resize 후 downgrade - catoon - original에 저장
+    #distort(downgradeOriginal, 1)  # downgrade원본 영상 변형
+
+    #filename2 = "E:\\Project\\GANs_tensorflow\\Video\\origin\\metalalchemist\\lrflip\\LR480_metalalchemist_01.mp4"
+    #extractFrame(filename2, 'lrflip',0)  # original영상의 프레임추출
+    #filename3 = "D:\\Project\\GANs_tensorflow\\Video\\downgrade\\metalalchemist\\lrflip\\LR320_metalalchemist_01.mp4"
+    #extractFrame(filename3, 'lrflip', 1)  # original영상의 프레임추출
+
+    # for문 돌면서 Video/origin/ 의 변형 영상리스트에서 프레임추출
+    """
+    folder = "D:\\Project\\GANs_tensorflow\\Video\\downgrade\\metalalchemist\\"
+    for dir in path.getDirList(folder):
+        files = path.getFileList(dir)
+        if not files == None:
+            for file in path.getFileList(dir):
+                print(file)
+                option = file.split("\\")[6]
+                extractFrame(file, option, 1)
+        else:
+            print('no files')
+    """
