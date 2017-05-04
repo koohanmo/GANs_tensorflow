@@ -6,7 +6,7 @@ import os
 import imageio
 import path as path
 
-editedDir = "E:\Project\GANs_tensorflow\Edited"
+editedDir = "D:\Project\GANs_tensorflow\Edited"
 header_list = ['BW', 'DK', 'IV', 'LR', 'UD', 'FL', 'LC', 'GR', 'RD', 'BL']
 option_list = ['blacknwhite', 'darken', 'invert', 'lrflip', 'udflip', 'lrudflip','lumcon','greenish','reddish', 'blueish']
 
@@ -113,7 +113,7 @@ def editVideoCut(filename, opening, ending):
 
     clip_name = os.path.join(editedDir, os.path.basename(filename).split('.')[0]) + ".mp4"
     # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
-    # clip.write_videofile(clip_name)
+    clip.write_videofile(clip_name)
     return clip_name
 
 
@@ -141,8 +141,10 @@ def saveOriginVideo(filename,clip, option):
     print(clip_name)
 
     if not os.path.exists(clip_name):
+        print("Making...")
         clip.write_videofile(clip_name)
-
+    else:
+        print("Already Exist")
     return clip_name
 
 
@@ -169,8 +171,10 @@ def saveDowngradeVideo(filename, clip, option):
     clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
 
     if not os.path.exists(clip_name):
+        print("Making...")
         clip.write_videofile(clip_name)
-
+    else:
+        print("Already Exist")
     return clip_name
 
 
@@ -274,19 +278,32 @@ def extractFrame(videoname, option, version):
 
 if __name__ == '__main__':
     imageio.plugins.ffmpeg.download()
-    filename = "E:\metalalchemist_01.avi"
+    filename = "D:\metalalchemist_01.avi"
     opening = '00:00:00'
     ending = '00:01:00'
     extractVideoFilename = editVideoCut(filename, opening=opening, ending=ending)  # 영상자르기 후 Edited에 저장
+
+    # originOriginal = editVideoResize(extractVideoFilename, 480)  # 영상resize 후 origin - catoon - original에 저장
+    # distort(originOriginal, 0)  # original원본 영상 변형
+
     #downgradeOriginal = editVideoResize(extractVideoFilename, 320)  # 영상resize 후 downgrade - catoon - original에 저장
-    #extractFrame(downgradeOriginal, 'original', 1)  # downgrade영상의 프레임추출
     #distort(downgradeOriginal, 1)  # downgrade원본 영상 변형
 
-    originOriginal = editVideoResize(extractVideoFilename, 480)  # 영상resize 후 origin - catoon - original에 저장
-    extractFrame(originOriginal, 'original', 0)  # original영상의 프레임추출
-    #distort(originOriginal, 0)  # original원본 영상 변형
+    #filename2 = "E:\\Project\\GANs_tensorflow\\Video\\origin\\metalalchemist\\lrflip\\LR480_metalalchemist_01.mp4"
+    #extractFrame(filename2, 'lrflip',0)  # original영상의 프레임추출
+    #filename3 = "D:\\Project\\GANs_tensorflow\\Video\\downgrade\\metalalchemist\\lrflip\\LR320_metalalchemist_01.mp4"
+    #extractFrame(filename3, 'lrflip', 1)  # original영상의 프레임추출
 
-#    filename2 = "E:\\Project\\GANs_tensorflow\\Video\\origin\\metalalchemist\\lrflip\\LR480_metalalchemist_01.mp4"
-#    extractFrame(filename2, 'lrflip',0)  # original영상의 프레임추출
-#    filename3 = "E:\\Project\\GANs_tensorflow\\Video\\downgrade\\metalalchemist\\lrflip\\LR320_metalalchemist_01.mp4"
-#    extractFrame(filename3, 'lrflip', 1)  # original영상의 프레임추출
+    # for문 돌면서 Video/origin/ 의 변형 영상리스트에서 프레임추출
+    """
+    folder = "D:\\Project\\GANs_tensorflow\\Video\\downgrade\\metalalchemist\\"
+    for dir in path.getDirList(folder):
+        files = path.getFileList(dir)
+        if not files == None:
+            for file in path.getFileList(dir):
+                print(file)
+                option = file.split("\\")[6]
+                extractFrame(file, option, 1)
+        else:
+            print('no files')
+    """
