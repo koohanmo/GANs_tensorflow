@@ -48,7 +48,7 @@ class batch_norm(object):
                                                 scope=self.name)
 
 
-def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_random,act=tf.nn.relu):
+def conv2d(input,ksize,strides,padding,layerName,is_batch_norm=True,initializer=variables.variable_random,act=tf.nn.relu):
     """
     Convolution Layer
     :param input:
@@ -64,6 +64,10 @@ def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_
      Ex) 'SAME' or 'VALID'
     :param layerName:
      Tensorboard name
+    :param is_batch_norm
+     True or False
+     Apply batch_normalization?
+     default = True
     :param initializer:
      Default : xavier
     :return: 
@@ -73,8 +77,11 @@ def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_
         with tf.name_scope('weight'):
             W = initializer(name=layerName, shape=ksize)
             #variables.variable_summaries(name=W) # initialize 에서 board에 체크
-        with tf.name_scope('activations'):
+        with tf.name_scope('activation'):
             output = tf.nn.conv2d(input = input, filter = W, strides = strides, padding = padding)
+            if(is_batch_norm):
+                batch_normalization = batch_norm(name = layerName+'_Batch_norm')
+                batch_normalization(output)
             output = act(output)
         print(output)
         return output
@@ -126,7 +133,7 @@ def avgPool(input,ksize,strides,padding,layerName):
                                 ksize = ksize,
                                 strides= strides,
                                 padding = padding)
-    #print(output)
+    print(output)
     return output
 
 def flatten(input, flatDim, layerName='flattenLayer'):
@@ -144,7 +151,7 @@ def flatten(input, flatDim, layerName='flattenLayer'):
     with tf.name_scope(layerName):
         flatten = tf.reshape(input, [-1, flatDim])
         variables.variable_summaries(name=layerName, var=flatten)
-    #print(flatten)
+    print(flatten)
     return flatten
 
 def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
@@ -164,7 +171,7 @@ def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
     """
     pass
 
-def fullyConnected(input, shape, layerName, initializer = variables.variable_xavier,act=tf.nn.relu):
+def fullyConnected(input, shape, layerName, is_batch_norm = True, initializer = variables.variable_xavier,act=tf.nn.relu):
     """
 
     :param input:
@@ -176,6 +183,10 @@ def fullyConnected(input, shape, layerName, initializer = variables.variable_xav
     :param initializer:
         init
         default = variables.variable_xavier
+    :param batch_norm:
+        True or False
+        Apply batch_normalization?
+        default = True
     :param act:
         activation function
         default = tf.nn.relu
@@ -193,8 +204,11 @@ def fullyConnected(input, shape, layerName, initializer = variables.variable_xav
             preActivate = tf.matmul(input, W) + B
             tf.summary.histogram(name=layerName+'/preActivate', values=preActivate)
         with tf.name_scope('activation'):
+            if (is_batch_norm):
+                batch_normalization = batch_norm(name = layerName + '_Batch_norm')
+                batch_normalization(preActivate)
             activations = act(preActivate)
-    #print(activations)
+    print(activations)
     return activations
 
 def crossEntropy(labels, logits, name = 'lossFunction'):
@@ -247,26 +261,35 @@ if __name__=="__main__":
     X_image = tf.reshape(X_data, [-1, 28, 28, 1])
     Y_label = tf.placeholder(tf.float32, shape = [None, 10])
     tf.summary.image('input', X_image, 12)
-
+    TRIAN_LOG_DIR = './logs/train'
+    TEST_LOG_DIR = './logs/test'
+    # path == userpath
+    # tensorboard --logdir = path/GANs_tensorflow/modelHelper/logs/test
+    # tensorboard --logdir = path/GANs_tensorflow/modelHelper/logs/train
+    # cd GANs_tensorflow\modelHelper\logs
 
     convLayer1 = conv2d(X_image,
                         ksize = [3,3,1,32],
                         strides = [1,1,1,1],
+                        padding='SAME',
                         layerName='convLayer1',
-                        padding='SAME')
+                        is_batch_norm=True
+                        )
 
 
     maxpoolLayer1 = maxPool(convLayer1,
                             ksize = [1,2,2,1],
                             strides=[1,2,2,1],
+                            padding='SAME',
                             layerName='maxpoolLayer1',
-                            padding='SAME')
+                            )
 
     convLayer2 = conv2d(maxpoolLayer1,
                         ksize=[3, 3, 32, 64],
                         strides=[1, 1, 1, 1],
+                        padding='SAME',
                         layerName='convLayer2',
-                        padding='SAME')
+                        is_batch_norm=True)
 
     maxpoolLayer2 = maxPool(convLayer2,
                             ksize=[1, 2, 2, 1],
@@ -276,9 +299,23 @@ if __name__=="__main__":
 
     flattenLayer = flatten(maxpoolLayer2, 7*7*64)
 
-    fcLayer1 = fullyConnected(flattenLayer, [7*7*64, 100], layerName='fullyConnected1')
-    fcLayer2 = fullyConnected(fcLayer1, [100, 50], layerName='fullyConnected2')
-    fcLayer3 = fullyConnected(fcLayer2, [50, 25],   layerName='fullyConnected3')
+    fcLayer1 = fullyConnected(input=flattenLayer,
+                              shape=[7*7*64, 100],
+                              layerName='fullyConnected1',
+                              is_batch_norm=True
+                              )
+
+    fcLayer2 = fullyConnected(input=fcLayer1,
+                              shape=[100, 50],
+                              layerName='fullyConnected2',
+                              is_batch_norm=True
+                              )
+
+    fcLayer3 = fullyConnected(input=fcLayer2,
+                              shape=[50, 25],
+                              layerName='fullyConnected3',
+                              is_batch_norm=True
+                              )
 
     with tf.name_scope('logits'):
         W = variables.variable_xavier('outW', [25,10])
@@ -286,7 +323,7 @@ if __name__=="__main__":
         logits = tf.matmul(fcLayer3, W) + B
         cost = crossEntropy(labels = Y_label, logits = logits)
 
-    train = trainOptimizer(cross_entropy = cost)
+    train = trainOptimizer(cost = cost)
 
     with tf.name_scope('accuracy'):
         prediction = tf.equal(tf.argmax(logits, 1) , tf.argmax(Y_label, 1))
@@ -297,8 +334,8 @@ if __name__=="__main__":
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        writer_test = tf.summary.FileWriter(logdir = './layers_test', graph = sess.graph)
-        writer_train = tf.summary.FileWriter(logdir = './layers_train', graph = sess.graph)
+        writer_test = tf.summary.FileWriter(logdir = TEST_LOG_DIR, graph = sess.graph)
+        writer_train = tf.summary.FileWriter(logdir = TRIAN_LOG_DIR, graph = sess.graph)
         # tf.summary.FileWriter(logdir = DIRECTORY , graph = sess.graph)
         # 또는
         # tf.summary.FileWriter(logdir = DIRECTORY)
