@@ -1,5 +1,5 @@
 import tensorflow as tf
-from . import variables
+import variables
 
 class batch_norm(object):
     """
@@ -48,7 +48,7 @@ class batch_norm(object):
                                                 scope=self.name)
 
 
-def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_xavier):
+def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_random,act=tf.nn.relu):
     """
     Convolution Layer
     :param input:
@@ -67,21 +67,16 @@ def conv2d(input,ksize,strides,padding,layerName,initializer=variables.variable_
     :param initializer:
      Default : xavier
     :return: 
-     Output tensor 
+     Output tensor
     """
     with tf.name_scope(layerName):
         with tf.name_scope('weight'):
-            W = initializer(shape=ksize)
-            variables.variable_summaries(W)
-        with tf.name_scope('bias'):
-            B = initializer(shape=ksize[-1])
-            variables.variable_summaries(B)
-        with tf.name_scope('preActivate'):
-            output = tf.nn.conv2d(input = input,
-                                       filter = W,
-                                       strides = strides,
-                                       padding = padding
-                                       ) + B
+            W = initializer(name=layerName, shape=ksize)
+            #variables.variable_summaries(name=W) # initialize 에서 board에 체크
+        with tf.name_scope('activations'):
+            output = tf.nn.conv2d(input = input, filter = W, strides = strides, padding = padding)
+            output = act(output)
+        print(output)
         return output
 
 
@@ -103,11 +98,10 @@ def maxPool(input,ksize,strides,padding,layerName):
      Output tensor
     """
     with tf.name_scope(layerName):
-        output = tf.nn.max_pool(input,
-                                ksize = ksize,
-                                strides=strides,
-                                padding = padding)
-        return output
+        output = tf.nn.max_pool(input, ksize = ksize, strides=strides, padding = padding)
+        variables.variable_summaries(name=layerName, var=output)
+    print(output)
+    return output
 
 
 def avgPool(input,ksize,strides,padding,layerName):
@@ -130,11 +124,12 @@ def avgPool(input,ksize,strides,padding,layerName):
     with tf.name_scope(layerName):
         output = tf.nn.avg_pool(input,
                                 ksize = ksize,
-                                strides=strides,
+                                strides= strides,
                                 padding = padding)
-        return output
+    #print(output)
+    return output
 
-def flatten(input, flatDim, layerName):
+def flatten(input, flatDim, layerName='flattenLayer'):
     """
     Flatten Layer
     :param input:
@@ -148,8 +143,9 @@ def flatten(input, flatDim, layerName):
     """
     with tf.name_scope(layerName):
         flatten = tf.reshape(input, [-1, flatDim])
-        variables.variable_summaries(flatten)
-        return flatten
+        variables.variable_summaries(name=layerName, var=flatten)
+    #print(flatten)
+    return flatten
 
 def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
     """
@@ -168,24 +164,176 @@ def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
     """
     pass
 
-def fullyConnected(input, shape, layerName, initializer = variables.variable_xavier):
+def fullyConnected(input, shape, layerName, initializer = variables.variable_xavier,act=tf.nn.relu):
+    """
+
+    :param input:
+        input tensor
+    :param shape:
+        dimension
+    :param layerName:
+        layer Name
+    :param initializer:
+        init
+        default = variables.variable_xavier
+    :param act:
+        activation function
+        default = tf.nn.relu
+    :return:
+        output act tensor
+    """
     with tf.name_scope(layerName):
-        if(initializer == variables.variable_xavier):
-            with tf.name_scope('weight'):
-                W = variables.variable_xavier(shape = shape)
-                variables.variable_summaries(W)
-            with tf.name_scope('bias'):
-                B = variables.variable_xavier(shape = shape[-1])
-                variables.variable_summaries(B)
-            with tf.name_scope('preActivate'):
-                preActivate = tf.matmul(input, W) + B
-                tf.summary.histogram(preActivate)
-        return preActivate
+        with tf.name_scope('weight'):
+            W = initializer(name=layerName+'/weight',shape = shape)
+            #variables.variable_summaries(W)
+        with tf.name_scope('bias'):
+            B = initializer(name=layerName+'/bias',shape = shape[-1])
+            #variables.variable_summaries(B)
+        with tf.name_scope('preActivate'):
+            preActivate = tf.matmul(input, W) + B
+            tf.summary.histogram(name=layerName+'/preActivate', values=preActivate)
+        with tf.name_scope('activation'):
+            activations = act(preActivate)
+    #print(activations)
+    return activations
 
+def crossEntropy(labels, logits, name = 'lossFunction'):
+    '''
+    Cross Entropy
+    :param labels:
+     labels = training or test data
+    :param logits:
+     logits = outputLayer
+    :param name:
+     name = crossEntropy Name
+     default = 'crossEntropy'
+    :return:
+     Output cost function
+    '''
+    with tf.name_scope(name):
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = labels, logits = logits))
+        tf.summary.scalar(name=name,tensor=cost)
+    return cost
 
+def trainOptimizer(cost, learning_rate = 1e-3, optimizer = tf.train.AdamOptimizer, name = 'train'):
+    '''
+
+    :param cost:
+        cost function
+    :param learning_rate:
+        learning_rate
+    :param optimizer:
+        default = AdamOptimizer
+    :param name:
+        trainName
+    :return:
+        optimize
+    '''
+    with tf.name_scope(name):
+        optimize = optimizer(learning_rate = learning_rate).minimize(cost)
+    return optimize
 
 
 if __name__=="__main__":
     """
     Test code...
+    MNIST CNN source code 에 layers 적용.
+    GPU 메모리 부족현상이 발생해서 test 배치사이즈를 순차적인 1000개를 임의적으로 선택.
     """
+    from tensorflow.examples.tutorials.mnist import input_data
+    mnist = input_data.read_data_sets('MNIST_data', one_hot = True)
+
+    X_data = tf.placeholder(tf.float32, shape = [None, 28*28])
+    X_image = tf.reshape(X_data, [-1, 28, 28, 1])
+    Y_label = tf.placeholder(tf.float32, shape = [None, 10])
+    tf.summary.image('input', X_image, 12)
+
+
+    convLayer1 = conv2d(X_image,
+                        ksize = [3,3,1,32],
+                        strides = [1,1,1,1],
+                        layerName='convLayer1',
+                        padding='SAME')
+
+
+    maxpoolLayer1 = maxPool(convLayer1,
+                            ksize = [1,2,2,1],
+                            strides=[1,2,2,1],
+                            layerName='maxpoolLayer1',
+                            padding='SAME')
+
+    convLayer2 = conv2d(maxpoolLayer1,
+                        ksize=[3, 3, 32, 64],
+                        strides=[1, 1, 1, 1],
+                        layerName='convLayer2',
+                        padding='SAME')
+
+    maxpoolLayer2 = maxPool(convLayer2,
+                            ksize=[1, 2, 2, 1],
+                            strides=[1, 2, 2, 1],
+                            layerName='maxpoolLayer2',
+                            padding='SAME')
+
+    flattenLayer = flatten(maxpoolLayer2, 7*7*64)
+
+    fcLayer1 = fullyConnected(flattenLayer, [7*7*64, 100], layerName='fullyConnected1')
+    fcLayer2 = fullyConnected(fcLayer1, [100, 50], layerName='fullyConnected2')
+    fcLayer3 = fullyConnected(fcLayer2, [50, 25],   layerName='fullyConnected3')
+
+    with tf.name_scope('logits'):
+        W = variables.variable_xavier('outW', [25,10])
+        B = variables.variable_random('outB', [10])
+        logits = tf.matmul(fcLayer3, W) + B
+        cost = crossEntropy(labels = Y_label, logits = logits)
+
+    train = trainOptimizer(cross_entropy = cost)
+
+    with tf.name_scope('accuracy'):
+        prediction = tf.equal(tf.argmax(logits, 1) , tf.argmax(Y_label, 1))
+        accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
+        tf.summary.scalar(name = 'accuracy', tensor = accuracy)
+
+    merged = tf.summary.merge_all()
+
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        writer_test = tf.summary.FileWriter(logdir = './layers_test', graph = sess.graph)
+        writer_train = tf.summary.FileWriter(logdir = './layers_train', graph = sess.graph)
+        # tf.summary.FileWriter(logdir = DIRECTORY , graph = sess.graph)
+        # 또는
+        # tf.summary.FileWriter(logdir = DIRECTORY)
+        # tf.summary.add_graph(sess.graph)
+
+        epoch_run = 1000
+        batch_size = 1000
+
+        total_batch = int(mnist.train.num_examples / batch_size)
+        for epoch in range(epoch_run):
+            for step in range(total_batch):
+                batch = mnist.train.next_batch(batch_size=batch_size)
+                sess.run(train, feed_dict={X_data:batch[0],
+                                           Y_label:batch[1]})
+
+
+            # Exhaused Memory Error
+            # batch size modified
+            # test data(10000) -> 분할해야함.
+            # train data - 분할
+
+            import random
+            random_batch = random.randint(0, len(mnist.test.images)-1000)
+
+            summary, acc = sess.run([merged, accuracy], feed_dict={X_data: mnist.test.images[random_batch:random_batch+1000],
+                                                        Y_label: mnist.test.labels[random_batch:random_batch+1000]})
+            print('===EPOCH %4s===' % (epoch))
+            writer_test.add_summary(summary, global_step=epoch)
+            print("[Test]Accuracy at step %s: %s" % (step, acc))
+
+            summary, acc = sess.run([merged, accuracy],
+                                    feed_dict={X_data: batch[0],
+                                               Y_label: batch[1]})
+            writer_train.add_summary(summary, global_step=epoch)
+            print("[Training]Accuracy at step %s: %s" % (step, acc))
+
+
+
