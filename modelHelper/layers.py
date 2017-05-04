@@ -247,12 +247,72 @@ def trainOptimizer(cost, learning_rate = 1e-3, optimizer = tf.train.AdamOptimize
         optimize = optimizer(learning_rate = learning_rate).minimize(cost)
     return optimize
 
+def restoreSaver(session,check_dir):
+    """
+    (*) 실행하기 전 last_epoch = tf.Variable(0, name='last_epoch') 선언
+    (*) session.run(global_variables_initializer()) 하기 전에 선언시켜줘야함.
+    (*) 복귀된 epoch는 session.run(last_epoch)의 리턴값으로 얻어짐.
+        Restore Saver
+    :param session:
+        현재 실행시킨 session
+    :param check_dir:
+        저장된 디렉토리 경로
+    :return:
+        세이버 리턴
+    """
+    saver = tf.train.Saver()
+    check_point = tf.train.get_checkpoint_state(check_dir)
+
+    if check_point and check_point.model_checkpoint_path:
+        try:
+            saver.restore(session, check_point.model_checkpoint_path)
+            print('successfully loaded : ', check_point.model_checkpoint_path)
+        except:
+            print('fail to load')
+    else:
+        print('could not find load data')
+
+    return saver
+
+def saveSaver(session, last_epoch ,global_step ,saver, check_dir, model_name = 'model'):
+    """
+        체크포인트 세이브
+    :param session:
+        현재 세션
+    :param last_epoch:
+        마지막 epoch
+        last_epoch - tf.Variable
+    :param global_step:
+        현재 global_step
+    :param saver:
+        저장시킬 saver
+    :param check_dir:
+        저장시킬 directory - restoreSaver 의 check_dir 과 같음.
+    :param model_name:
+        저장시킬 모델이름.
+        default = 'model'
+    :return:
+        세이버 리턴
+    """
+    import os
+    if not os.path.exists(check_dir):
+        os.makedirs(check_dir)
+    try:
+        session.run(last_epoch.assign(global_step+1))
+        saver.save(sess=session,save_path = check_dir+'/'+model_name, global_step = global_step)
+        print('step',global_step,'successfully save dir :', check_dir+'/'+model_name+'-'+str(global_step))
+    except:
+        print('fail to save')
+
+    return saver
 
 if __name__=="__main__":
     """
     Test code...
     MNIST CNN source code 에 layers 적용.
     GPU 메모리 부족현상이 발생해서 test 배치사이즈를 순차적인 1000개를 임의적으로 선택.
+
+    세이버 저장/불러오기추가.
     """
     from tensorflow.examples.tutorials.mnist import input_data
     mnist = input_data.read_data_sets('MNIST_data', one_hot = True)
@@ -267,6 +327,8 @@ if __name__=="__main__":
     # tensorboard --logdir = path/GANs_tensorflow/modelHelper/logs/test
     # tensorboard --logdir = path/GANs_tensorflow/modelHelper/logs/train
     # cd GANs_tensorflow\modelHelper\logs
+    CHECK_POINT_DIR = './checkpoint'
+    # userpath/checkpoint/*model-*
 
     convLayer1 = conv2d(X_image,
                         ksize = [3,3,1,32],
@@ -333,6 +395,11 @@ if __name__=="__main__":
     merged = tf.summary.merge_all()
 
     with tf.Session() as sess:
+        # last_epoch
+        # 복귀시킬 epoch 를 선언.
+        # tf.전역변수초기화하기 전 선언시켜둬야함.
+        last_epoch = tf.Variable(0, name='last_epoch')
+
         sess.run(tf.global_variables_initializer())
         writer_test = tf.summary.FileWriter(logdir = TEST_LOG_DIR, graph = sess.graph)
         writer_train = tf.summary.FileWriter(logdir = TRIAN_LOG_DIR, graph = sess.graph)
@@ -341,11 +408,14 @@ if __name__=="__main__":
         # tf.summary.FileWriter(logdir = DIRECTORY)
         # tf.summary.add_graph(sess.graph)
 
+        saver = restoreSaver(session = sess,
+                            check_dir = CHECK_POINT_DIR)
+        start_from = sess.run(last_epoch)
         epoch_run = 1000
         batch_size = 1000
 
         total_batch = int(mnist.train.num_examples / batch_size)
-        for epoch in range(epoch_run):
+        for epoch in range(start_from, epoch_run):
             for step in range(total_batch):
                 batch = mnist.train.next_batch(batch_size=batch_size)
                 sess.run(train, feed_dict={X_data:batch[0],
@@ -364,13 +434,19 @@ if __name__=="__main__":
                                                         Y_label: mnist.test.labels[random_batch:random_batch+1000]})
             print('===EPOCH %4s===' % (epoch))
             writer_test.add_summary(summary, global_step=epoch)
-            print("[Test]Accuracy at step %s: %s" % (step, acc))
+            print("[Test]Accuracy at epoch %s: %s" % (epoch, acc))
 
             summary, acc = sess.run([merged, accuracy],
                                     feed_dict={X_data: batch[0],
                                                Y_label: batch[1]})
             writer_train.add_summary(summary, global_step=epoch)
-            print("[Training]Accuracy at step %s: %s" % (step, acc))
+            print("[Training]Accuracy at epoch %s: %s" % (epoch, acc))
 
-
+            saver = saveSaver(session=sess,
+                              last_epoch=last_epoch,
+                              global_step=epoch,
+                              saver=saver,
+                              check_dir=CHECK_POINT_DIR,
+                              model_name='test_model'
+                              )
 
