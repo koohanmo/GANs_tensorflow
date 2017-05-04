@@ -21,10 +21,33 @@ def load_image_data_without_label(
                                     shuffle=True,
                                     ratio=[6,3,1]
                                     ):
-
+    """
+    lable이 없는 이미지를 읽어서 데이터셋을 반환
+    :param name: 
+     동영상의 이름
+    :param option: 
+     어떤 처리를 가한 이미지를 가져올 것인지
+    :param resize: 
+     사이즈를 줄일 것인지
+    :param pathload: 
+     이미지의 경로를 가지고 있다가 사용 할 때 로드 할 것인지
+    :param normalize: 
+     [0, 255] -> [0, 1] 로 정규화 할 것인지
+    :param serialize:
+     이미지를 1차원으로 펼칠 지
+    :param dtype: 
+     데이터의 타입
+     Ex ) np.float32
+    :param shuffle: 
+     데이터셋을 섞을지
+    :param ratio: 
+     train, test, validaion의 비율
+    :return: 
+     Datasets라는 클래스  반환(train, test, validation)
+    """
     datasets = Datasets()
 
-    images_files_path=None
+    images_dir_path=None
     if resize : images_dir_path = utils.path.getImageDowngradeDirPath(name, option)
     else : images_dir_path = utils.path.getImageOriginDirPath(name, option)
 
