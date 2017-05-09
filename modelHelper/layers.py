@@ -150,7 +150,7 @@ def flatten(t_input, flatDim, layerName='flattenLayer'):
         #variables.variable_summaries(name=layerName, var=flatten)
     return flatten
 
-def fullyConnected(t_input, shape, layerName, is_batch_norm = True, initializer = variables.variable_xavier,act=tf.nn.relu):
+def fullyConnected(t_input, shape, layerName, initializer = variables.variable_xavier):
     """
 
     :param input:
@@ -201,6 +201,9 @@ def crossEntropy(labels, logits, name = 'lossFunction'):
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = labels, logits = logits))
         tf.summary.scalar(name=name,tensor=cost)
     return cost
+
+def lrelu(x,leak=0.2):
+    return tf.maximum(x,leak*x)
 
 def trainOptimizer(cost, learning_rate = 1e-3, optimizer = tf.train.AdamOptimizer, name = 'train'):
     '''
