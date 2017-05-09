@@ -48,10 +48,10 @@ class batch_norm(object):
                                                 scope=self.name)
 
 
-def conv2d(input,ksize,strides,padding,layerName,is_batch_norm=True,initializer=variables.variable_random,act=tf.nn.relu):
+def conv2d(t_input,ksize,strides,padding,layerName,is_batch_norm=True,initializer=variables.variable_random,act=tf.nn.relu):
     """
     Convolution Layer
-    :param input:
+    :param t_input:
      Input tensor([batch_size, height, width, channel])
     :param ksize:
      Kernel(filter) size
@@ -75,19 +75,18 @@ def conv2d(input,ksize,strides,padding,layerName,is_batch_norm=True,initializer=
     """
     with tf.name_scope(layerName):
         with tf.name_scope('weight'):
-            W = initializer(name=layerName, shape=ksize)
+            W = initializer(name=layerName+"/Weight", shape=ksize)
             #variables.variable_summaries(name=W) # initialize 에서 board에 체크
         with tf.name_scope('activation'):
-            output = tf.nn.conv2d(input = input, filter = W, strides = strides, padding = padding)
+            output = tf.nn.conv2d(input = t_input, filter = W, strides = strides, padding = padding)
             if(is_batch_norm):
-                batch_normalization = batch_norm(name = layerName+'_Batch_norm')
+                batch_normalization = batch_norm(name = layerName+'/Batch_norm')
                 batch_normalization(output)
             output = act(output)
-        print(output)
         return output
 
 
-def maxPool(input,ksize,strides,padding,layerName):
+def maxPool(t_input,ksize,strides,padding,layerName):
     """
     MaxPool Layer
     :param input: 
@@ -105,13 +104,12 @@ def maxPool(input,ksize,strides,padding,layerName):
      Output tensor
     """
     with tf.name_scope(layerName):
-        output = tf.nn.max_pool(input, ksize = ksize, strides=strides, padding = padding)
+        output = tf.nn.max_pool(t_input, ksize = ksize, strides=strides, padding = padding)
         variables.variable_summaries(name=layerName, var=output)
-    print(output)
     return output
 
 
-def avgPool(input,ksize,strides,padding,layerName):
+def avgPool(t_input,ksize,strides,padding,layerName):
     """
     AvgPool Layer
     :param input: 
@@ -129,14 +127,13 @@ def avgPool(input,ksize,strides,padding,layerName):
      Output tensor
     """
     with tf.name_scope(layerName):
-        output = tf.nn.avg_pool(input,
+        output = tf.nn.avg_pool(t_input,
                                 ksize = ksize,
                                 strides= strides,
                                 padding = padding)
-    print(output)
     return output
 
-def flatten(input, flatDim, layerName='flattenLayer'):
+def flatten(t_input, flatDim, layerName='flattenLayer'):
     """
     Flatten Layer
     :param input:
@@ -149,29 +146,11 @@ def flatten(input, flatDim, layerName='flattenLayer'):
      Output tensor
     """
     with tf.name_scope(layerName):
-        flatten = tf.reshape(input, [-1, flatDim])
+        flatten = tf.reshape(t_input, [-1, flatDim])
         variables.variable_summaries(name=layerName, var=flatten)
-    print(flatten)
     return flatten
 
-def nnLayer(input,outputSize,layerName,initializer=variables.variable_xavier):
-    """
-    이름이 안떠올라요 도와주세요....
-    WX+B
-    :param input:
-     Input tensor
-    :param outputSize:
-      Output tensor dim
-    :param layerName: 
-     Tensorboard name
-    :param initializer:
-     Default : xavier
-    :return:
-     Output tensor
-    """
-    pass
-
-def fullyConnected(input, shape, layerName, is_batch_norm = True, initializer = variables.variable_xavier,act=tf.nn.relu):
+def fullyConnected(t_input, shape, layerName, is_batch_norm = True, initializer = variables.variable_xavier,act=tf.nn.relu):
     """
 
     :param input:
@@ -196,20 +175,14 @@ def fullyConnected(input, shape, layerName, is_batch_norm = True, initializer = 
     with tf.name_scope(layerName):
         with tf.name_scope('weight'):
             W = initializer(name=layerName+'/weight',shape = shape)
-            #variables.variable_summaries(W)
+            variables.variable_summaries(W)
         with tf.name_scope('bias'):
             B = initializer(name=layerName+'/bias',shape = shape[-1])
-            #variables.variable_summaries(B)
+            variables.variable_summaries(B)
         with tf.name_scope('preActivate'):
-            preActivate = tf.matmul(input, W) + B
+            preActivate = tf.matmul(t_input, W) + B
             tf.summary.histogram(name=layerName+'/preActivate', values=preActivate)
-        with tf.name_scope('activation'):
-            if (is_batch_norm):
-                batch_normalization = batch_norm(name = layerName + '_Batch_norm')
-                batch_normalization(preActivate)
-            activations = act(preActivate)
-    print(activations)
-    return activations
+    return preActivate
 
 def crossEntropy(labels, logits, name = 'lossFunction'):
     '''
