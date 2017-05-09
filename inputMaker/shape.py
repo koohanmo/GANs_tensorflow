@@ -47,6 +47,7 @@ class ImageSetWithoutLable(object):
         :return: 
          batch 크기의 이미지 데이터(np.array)
         """
+
         assert batch_size <= self._num_examples, (
             "batch_size : %s num_examples : %s" % (batch_size,
                                                    self._num_examples))

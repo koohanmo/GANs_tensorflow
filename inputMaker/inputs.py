@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import collections
-import input_shape
+import shape
 import utils
 
 class Datasets(object):
@@ -71,33 +71,33 @@ def load_image_data_without_label(
     images_validatiaon = np.array(images_validatiaon)
 
     if pathload:
-        datasets.train = input_shape.ImagePathSetWithoutLable(images_files_path[train_start:train_end],
+        datasets.train = shape.ImagePathSetWithoutLable(images_files_path[train_start:train_end],
                                                               normalize=normalize,
                                                               serialize=serialize,
                                                               dtype=dtype,
                                                               shuffle=shuffle)
-        datasets.validation = input_shape.ImagePathSetWithoutLable(images_files_path[test_start:test_end],
+        datasets.validation = shape.ImagePathSetWithoutLable(images_files_path[test_start:test_end],
                                                                    normalize=normalize,
                                                                    serialize=serialize,
                                                                    dtype=dtype,
                                                                    shuffle=shuffle)
-        datasets.test = input_shape.ImagePathSetWithoutLable(images_files_path[validation_start:validation_end],
+        datasets.test = shape.ImagePathSetWithoutLable(images_files_path[validation_start:validation_end],
                                                              normalize=normalize,
                                                              serialize=serialize,
                                                              dtype=dtype,
                                                              shuffle=shuffle)
     else :
-        datasets.train = input_shape.ImageSetWithoutLable(images_train,
+        datasets.train = shape.ImageSetWithoutLable(images_train,
                                                          normalize=normalize,
                                                          serialize=serialize,
                                                          dtype=dtype,
                                                          shuffle=shuffle)
-        datasets.test = input_shape.ImageSetWithoutLable(images_test,
+        datasets.test = shape.ImageSetWithoutLable(images_test,
                                                                normalize=normalize,
                                                                serialize=serialize,
                                                                dtype=dtype,
                                                                shuffle=shuffle)
-        datasets.validation = input_shape.ImageSetWithoutLable(images_validatiaon,
+        datasets.validation = shape.ImageSetWithoutLable(images_validatiaon,
                                                          normalize=normalize,
                                                          serialize=serialize,
                                                          dtype=dtype,
@@ -108,7 +108,7 @@ def load_image_data_without_label(
 def load_image_data_with_label(
                                     name,
                                     option ='original',
-                                    label_func= lambda : True,
+                                    label = True,
                                     resize=True,
                                     pathload=False,
                                     normalize=False,
@@ -117,7 +117,32 @@ def load_image_data_with_label(
                                     shuffle=True,
                                     ratio=[6,3,1]
                                     ):
-
+    """
+    이미지를 읽어서 데이터셋을 반환
+    :param name: 
+     동영상의 이름
+    :param option: 
+     어떤 처리를 가한 이미지를 가져올 것인지
+    :param label: 
+     레이블이 1인지 0인지
+    :param resize: 
+     사이즈를 줄일 것인지
+    :param pathload: 
+     이미지의 경로를 가지고 있다가 사용 할 때 로드 할 것인지
+    :param normalize: 
+     [0, 255] -> [0, 1] 로 정규화 할 것인지
+    :param serialize:
+     이미지를 1차원으로 펼칠 지
+    :param dtype: 
+     데이터의 타입
+     Ex ) np.float32
+    :param shuffle: 
+     데이터셋을 섞을지
+    :param ratio: 
+     train, test, validaion의 비율
+    :return: 
+     Datasets라는 클래스  반환(train, test, validation)
+    """
     datasets = Datasets()
 
     images_files_path=None
@@ -145,33 +170,33 @@ def load_image_data_with_label(
     images_validatiaon = np.array(images_validatiaon)
 
     if pathload:
-        datasets.train = input_shape.ImageSetWithLabel(images_files_path[train_start:train_end],
+        datasets.train = shape.ImageSetWithLabel(images_files_path[train_start:train_end],
                                                               normalize=normalize,
                                                               serialize=serialize,
                                                               dtype=dtype,
                                                               shuffle=shuffle)
-        datasets.test = input_shape.ImageSetWithLabel(images_files_path[test_start:test_end],
+        datasets.test = shape.ImageSetWithLabel(images_files_path[test_start:test_end],
                                                                    normalize=normalize,
                                                                    serialize=serialize,
                                                                    dtype=dtype,
                                                                    shuffle=shuffle)
-        datasets.validation = input_shape.ImageSetWithLabel(images_files_path[validation_start:validation_end],
+        datasets.validation = shape.ImageSetWithLabel(images_files_path[validation_start:validation_end],
                                                              normalize=normalize,
                                                              serialize=serialize,
                                                              dtype=dtype,
                                                              shuffle=shuffle)
     else :
-        datasets.train = input_shape.ImagePathSetWithLable(images_train,
+        datasets.train = shape.ImagePathSetWithLable(images_train,
                                                          normalize=normalize,
                                                          serialize=serialize,
                                                          dtype=dtype,
                                                          shuffle=shuffle)
-        datasets.test = input_shape.ImagePathSetWithLable(images_test,
+        datasets.test = shape.ImagePathSetWithLable(images_test,
                                                                normalize=normalize,
                                                                serialize=serialize,
                                                                dtype=dtype,
                                                                shuffle=shuffle)
-        datasets.validation = input_shape.ImagePathSetWithLable(images_validatiaon,
+        datasets.validation = shape.ImagePathSetWithLable(images_validatiaon,
                                                          normalize=normalize,
                                                          serialize=serialize,
                                                          dtype=dtype,
