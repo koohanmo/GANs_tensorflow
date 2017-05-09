@@ -48,7 +48,7 @@ class batch_norm(object):
                                                 scope=self.name)
 
 
-def conv2d(t_input,ksize,strides,padding,layerName,is_batch_norm=True,initializer=variables.variable_random,act=tf.nn.relu):
+def conv2d(t_input,ksize,strides,padding,layerName,initializer=variables.variable_random):
     """
     Convolution Layer
     :param t_input:
@@ -79,10 +79,6 @@ def conv2d(t_input,ksize,strides,padding,layerName,is_batch_norm=True,initialize
             #variables.variable_summaries(name=W) # initialize 에서 board에 체크
         with tf.name_scope('activation'):
             output = tf.nn.conv2d(input = t_input, filter = W, strides = strides, padding = padding)
-            if(is_batch_norm):
-                batch_normalization = batch_norm(name = layerName+'/Batch_norm')
-                batch_normalization(output)
-            output = act(output)
         return output
 
 
@@ -132,6 +128,10 @@ def avgPool(t_input,ksize,strides,padding,layerName):
                                 strides= strides,
                                 padding = padding)
     return output
+
+def residual_layer(t_input):
+    pass
+
 
 def flatten(t_input, flatDim, layerName='flattenLayer'):
     """
