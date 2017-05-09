@@ -129,10 +129,6 @@ def avgPool(t_input,ksize,strides,padding,layerName):
                                 padding = padding)
     return output
 
-def residual_layer(t_input):
-    pass
-
-
 def flatten(t_input, flatDim, layerName='flattenLayer'):
     """
     Flatten Layer
