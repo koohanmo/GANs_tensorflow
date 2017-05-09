@@ -147,7 +147,7 @@ def flatten(t_input, flatDim, layerName='flattenLayer'):
     """
     with tf.name_scope(layerName):
         flatten = tf.reshape(t_input, [-1, flatDim])
-        variables.variable_summaries(name=layerName, var=flatten)
+        #variables.variable_summaries(name=layerName, var=flatten)
     return flatten
 
 def fullyConnected(t_input, shape, layerName, is_batch_norm = True, initializer = variables.variable_xavier,act=tf.nn.relu):
@@ -175,10 +175,10 @@ def fullyConnected(t_input, shape, layerName, is_batch_norm = True, initializer 
     with tf.name_scope(layerName):
         with tf.name_scope('weight'):
             W = initializer(name=layerName+'/weight',shape = shape)
-            variables.variable_summaries(W)
+            #variables.variable_summaries(W)
         with tf.name_scope('bias'):
             B = initializer(name=layerName+'/bias',shape = shape[-1])
-            variables.variable_summaries(B)
+            #variables.variable_summaries(B)
         with tf.name_scope('preActivate'):
             preActivate = tf.matmul(t_input, W) + B
             tf.summary.histogram(name=layerName+'/preActivate', values=preActivate)
