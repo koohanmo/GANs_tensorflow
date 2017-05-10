@@ -4,7 +4,7 @@ from moviepy.editor import *
 import moviepy.video.fx.all as vfx
 import os
 import imageio
-import path as path
+from . import path
 
 editedDir = "D:\Project\GANs_tensorflow\Edited"
 header_list = ['BW', 'DK', 'IV', 'LR', 'UD', 'FL', 'LC', 'GR', 'RD', 'BL']
@@ -148,7 +148,7 @@ def saveOriginVideo(filename,clip, option):
     return clip_name
 
 
-def saveDowngradeVideo(filename, clip, option):
+def saveDowngradeVideo(name, filename, clip, option):
     """
         수정된 영상 폴더별 저장 - 저화질 애들
         :param filename:
@@ -162,14 +162,12 @@ def saveDowngradeVideo(filename, clip, option):
          편집영상 이름
          Ex) 
     """
-    basename = os.path.basename(filename).split('_')[1]
 
-    dirpath = path.getVideoDowngradeDirPath(basename, option)
+    dirpath = path.setVideoDowngradeDirPath(name, option)
     if not os.path.isdir(dirpath):
-        dirpath = path.setVideoDowngradeDirPath(basename, option)
+        dirpath = path.setVideoDowngradeDirPath(name, option)
 
-    clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
-
+    clip_name = os.path.join(dirpath, filename)
     if not os.path.exists(clip_name):
         print("Making...")
         clip.write_videofile(clip_name)
@@ -178,30 +176,26 @@ def saveDowngradeVideo(filename, clip, option):
     return clip_name
 
 
-def editVideoResize(filename, height, low_height=90):
+def editVideoResize(name, filename, width, height, resize):
     """
     영상크기 변환(화질낮추기)
     :param filename:
      영상 파일명
      Ex) FULLMETAL ALCHEMIST-01.avi
+    :param width:
+     영상 가로값
     :param height:
      영상 세로값
-    :param low_height:
-
     :return:
      Resize된 클립 명
      Ex) E240FULLMETAL ALCHEMIST-01.mp4
     """
-    newFilename = str(height) + "_" + os.path.basename(filename).split('.')[0] + ".mp4"
 
-    width = (height / 3) * 4
-    if (height == 320):
-        low_width = (low_height / 3) * 4
-        resized = VideoFileClip(filename).resize((low_width, low_height)).resize((width, height))
-        clip_name = saveDowngradeVideo(newFilename, resized, 'original')
-    elif (height == 480):
-        resized = VideoFileClip(filename).resize((width, height))
-        clip_name = saveOriginVideo(newFilename, resized, 'original')
+    newFilename = str(height) + "_" + os.path.split(filename)[-1]
+    resized = VideoFileClip(filename).resize((width, height))
+    clip_name=None
+    if resize : clip_name = saveDowngradeVideo(name, newFilename, resized, 'original')
+    else : clip_name = saveOriginVideo(name, newFilename, resized, 'original')
 
     return clip_name
 

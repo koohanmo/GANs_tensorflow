@@ -2,7 +2,7 @@ import os
 
 # path variables about video
 videos = ['conan', 'naruto', 'onepiece']
-videoDir = "D:/Project/GANs_tensorflow/Video"
+videoDir = "D:\Project\GANs_tensorflow\Video"
 originVideoDir = os.path.join(videoDir, 'origin')
 downgradeVideoDir = os.path.join(videoDir, 'downgrade')
 imageDir = "D:\Project\GANs_tensorflow\Image"
@@ -67,7 +67,8 @@ def setVideoDowngradeDirPath(name, option='original'):
     print(dirname)
     if not os.path.isdir(os.path.join(downgradeVideoDir, name)):
         os.mkdir(os.path.join(downgradeVideoDir, name))
-    os.mkdir(dirname)
+    if not os.path.isdir(dirname):
+        os.mkdir(dirname)
     return dirname
 
 
