@@ -28,14 +28,79 @@ class SRGAN(object):
     def train(self):
         pass
 
-    def generator(self,input_low):
-        with tf.name_scope('generator'):
-            layer1 = mh.layers.conv2d(t_input = input_low,
-                                      ksize = [9,9,3,64],
-                                      strides = [1,2,2,1],
-                                      padding = 'SAME',
-                                      layerName = 'gen_layer1')
-            act1 = mh.layers.lrelu(layer1)
+    def generator(self, inputs, reuse=False):
+        with tf.variable_scope('generator', reuse = reuse):
+            # k9n64s1
+            layer1 = mh.layers.conv2d_transpose(t_input = inputs,
+                                                fliter_shape = [9, 9, 3, 64],
+                                                output_shape = [-1, 320, 240, 64],
+                                                strides = [1, 1, 1, 1],
+                                                layerName = 'gen_layer1'
+                                                )
+            x = mh.layers.lrelu(layer1)
+            skip_connect_0 = x
+
+            # k3n64s1 - k3n64s1
+            for i in range(1,5+1): # residual blocks
+                forward = x
+                with tf.name_scope('block{}'.format(i)):
+                    x = mh.layers.conv2d_transpose(t_input = x,
+                                                fliter_shape = [3, 3, 64, 64],
+                                                output_shape = [-1, 320, 240, 64],
+                                                strides = [1, 1, 1, 1],
+                                                layerName = 'residual_block_a_{}'.format(i)
+                                                )
+                    BN = mh.layers.batch_norm()
+                    x = BN(x)
+                    x = mh.layers.lrelu(x)
+
+                    x = mh.layers.conv2d_transpose(t_input = x,
+                                                fliter_shape = [3, 3, 64, 64],
+                                                output_shape = [-1, 320, 240, 64],
+                                                strides = [1, 1, 1, 1],
+                                                layerName = 'residual_block_b_{}'.format(i)
+                                                )
+                    x = BN(x)
+
+                    x = tf.add(x, forward)
+
+            # k3n64s1
+            x = mh.layers.conv2d_transpose(t_input=x,
+                                           fliter_shape=[3, 3, 64, 64],
+                                           output_shape=[-1, 320, 240, 64],
+                                           strides=[1, 1, 1, 1],
+                                           layerName='gen_layer2'
+                                           )
+            BN = mh.layers.batch_norm()
+            x = BN(x)
+            x = tf.add(skip_connect_0, x)
+
+            # k3n256s1
+            x = mh.layers.conv2d_transpose(t_input=x,
+                                           fliter_shape=[3, 3, 64, 256],
+                                           output_shape=[-1, 320, 240, 256],
+                                           strides=[1, 1, 1, 1],
+                                           layerName='gen_layer3'
+                                           )
+            # x = mh.layers.pixelShuffler(x)
+            # pixelShuffler...
+            x = mh.layers.lrelu(x)
+
+            # k3n256s1
+            # layer gen_layer4
+            # x = mh.layers.conv2d_transpose(t_input = x , ...)
+            # x = mh.layers.pixelShuffler(x)
+            # x = mh.layers.lrelu(x)
+
+            # k9n3s1
+            # layer gen_layer5
+            ret = mh.layers.conv2d_transpose(t_input = x,
+                                             filter_shape = [9,9,256,3],
+                                             output_shape = [-1,320,240,3],
+                                             strides=[1,1,1,1],
+                                             layerName='gen_layer5')
+            return ret
+
 
 
     def discriminator(self,inputs,lables, reuse=False):
