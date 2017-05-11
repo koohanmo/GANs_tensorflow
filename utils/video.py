@@ -6,7 +6,6 @@ import os
 import imageio
 from . import path
 
-editedDir = "D:\Project\GANs_tensorflow\Edited"
 header_list = ['BW', 'DK', 'IV', 'LR', 'UD', 'FL', 'LC', 'GR', 'RD', 'BL']
 option_list = ['blacknwhite', 'darken', 'invert', 'lrflip', 'udflip', 'lrudflip','lumcon','greenish','reddish', 'blueish']
 
@@ -93,7 +92,7 @@ def distort(filename, option=0):
             clip_name = saveDowngradeVideo(newFilename, clip_list[clipIdx], option_list[clipIdx])
 
 
-def editVideoCut(filename, opening, ending):
+def editVideoCut(name, filename, opening, ending):
     """
     영상에서 오프닝과 엔딩제거
     :param filename:
@@ -107,73 +106,24 @@ def editVideoCut(filename, opening, ending):
 
      Ex) 
     """
-    original = VideoFileClip(filename)
-    print(original.fps)
-    clip = original.subclip(opening, ending)
 
-    clip_name = os.path.join(editedDir, os.path.basename(filename).split('.')[0]) + ".mp4"
-    # 주석풀것! - 잠시 뒤에 함수 테스트 하느라 주석
+    clip = VideoFileClip(filename,audio=False).subclip(opening,ending)
+
+    edit_videodir = path.get_origin_video_path(name,option='edit')
+    clip_name = os.path.join(edit_videodir, os.path.basename(filename))
+
+    path.make_dir(edit_videodir)
     clip.write_videofile(clip_name)
     return clip_name
 
 
-def saveOriginVideo(filename,clip, option):
-    """
-        수정된 영상 폴더별 저장 - 원본이 될 애들 (480p)
-        :param filename:
-         영상 파일명
-         Ex) FULLMETAL ALCHEMIST-01.avi
-        :param clip:
-         옵션
-        :param option:
-         옵션
-        :return:
-         편집영상 이름
-         Ex) 
-    """
-    basename = os.path.basename(filename).split('_')[1]
-
-    dirpath = path.getVideoOriginDirPath(basename, option)
-    if not os.path.isdir(dirpath):
-        dirpath = path.setVideoOriginDirPath(basename,option)
-
-    clip_name = os.path.join(dirpath, os.path.basename(filename).split('.')[0]) + ".mp4"
-    print(clip_name)
-
-    if not os.path.exists(clip_name):
-        print("Making...")
-        clip.write_videofile(clip_name)
-    else:
-        print("Already Exist")
-    return clip_name
-
-
-def saveDowngradeVideo(name, filename, clip, option):
-    """
-        수정된 영상 폴더별 저장 - 저화질 애들
-        :param filename:
-         영상 파일명
-         Ex) FULLMETAL ALCHEMIST-01.avi
-        :param clip:
-         옵션
-        :param option:
-         옵션
-        :return:
-         편집영상 이름
-         Ex) 
-    """
-
-    dirpath = path.setVideoDowngradeDirPath(name, option)
-    if not os.path.isdir(dirpath):
-        dirpath = path.setVideoDowngradeDirPath(name, option)
-
-    clip_name = os.path.join(dirpath, filename)
-    if not os.path.exists(clip_name):
-        print("Making...")
-        clip.write_videofile(clip_name)
-    else:
-        print("Already Exist")
-    return clip_name
+def save_video(path,clip):
+    dir_path = os.path.dirname(path)
+    path.make_dir(dir_path)
+    if not os.path.exists(path):
+        clip.write_videofile(path)
+    else : print("Already Exist")
+    return path
 
 
 def editVideoResize(name, filename, width, height, resize):
@@ -191,60 +141,16 @@ def editVideoResize(name, filename, width, height, resize):
      Ex) E240FULLMETAL ALCHEMIST-01.mp4
     """
 
-    newFilename = str(height) + "_" + os.path.split(filename)[-1]
     resized = VideoFileClip(filename).resize((width, height))
     clip_name=None
-    if resize : clip_name = saveDowngradeVideo(name, newFilename, resized, 'original')
-    else : clip_name = saveOriginVideo(name, newFilename, resized, 'original')
-
+    if resize : clip_name = path.get_lr_video_path(name,'origianl')
+    else : clip_name =  path.get_hr_video_path(name,'origianl')
+    clip_name = os.path.join(clip_name,os.path.basename(filename))
+    clip_name = save_video(clip_name,resized)
     return clip_name
 
 
-def setImageOriginPath(videoname, option):
-    """
-        Origin 영상에서 프레임 추출시 경로
-        :param videoname:
-         영상 파일명
-         Ex) FULLMETAL ALCHEMIST-01.avi
-        :param option:
-         변형방식
-        :return dirpath:
-         경로 반환
-    """
-    basename = os.path.basename(videoname).split('_')[1]
-    dirpath = path.getImageOriginDirPath(basename, option)
-
-    if not os.path.isdir(dirpath):
-        dirpath = path.setImageOriginDirPath(basename, option)
-
-    dirpath = os.path.join(dirpath, os.path.basename(videoname).split('.')[0])
-
-    return dirpath
-
-
-def setImageDowngradePath(videoname, option):
-    """
-        Downgrade 영상에서 프레임 추출시 경로
-        :param videoname:
-         영상 파일명
-         Ex) FULLMETAL ALCHEMIST-01.avi
-        :param option:
-         변형방식
-        :return dirpath:
-         경로 반환
-    """
-    basename = os.path.basename(videoname).split('_')[1]
-    dirpath = path.getImageDowngradeDirPath(basename, option)
-
-    if not os.path.isdir(dirpath):
-        dirpath = path.setImageDowngradeDirPath(basename, option)
-
-    dirpath = os.path.join(dirpath, os.path.basename(videoname).split('.')[0])
-
-    return dirpath
-
-
-def extractFrame(videoname, option, version):
+def extractFrame(name, videofile, option, resize):
     """
     Origin 영상에서 프레임 추출
     :param videoname:
@@ -252,22 +158,23 @@ def extractFrame(videoname, option, version):
      Ex) FULLMETAL ALCHEMIST-01.avi
     :param option:
      변형방식
-    :param version:
-     origin(0) downgrade(1)
+    :param resize:
+     True : LR
+     False : HR
     """
-    if version==0:
-        dirpath = setImageOriginPath(videoname, option)
-    else:
-        dirpath = setImageDowngradePath(videoname, option)
+    dirpath =None
+    if resize : dirpath = path.get_lr_image_path(name, option)
+    else: dirpath = path.get_hr_image_path(name, option)
+    path.make_dir(dirpath)
 
-    print(dirpath)
-    if not os.path.exists(dirpath+"_images00000.jpeg"):
+    image_name_format = os.path.join(dirpath, os.path.basename(videofile).split('.')[0])
+    firstImage = os.path.join(image_name_format+"_00001.jpeg")
+    if not os.path.exists(firstImage):
         print('Making...')
         vertical_flip = lambda frame: frame[::]  # rotate 180 [::-1]
-        clip = VideoFileClip(videoname)
-        clip.fl_image(vertical_flip).to_images_sequence(dirpath + "_images%05d.jpeg")
-    else:
-        print('Already Exist')
+        clip = VideoFileClip(videofile)
+        clip.fl_image(vertical_flip).to_images_sequence(image_name_format + "_%05d.jpeg")
+    else: print('Already Exist')
 
 
 if __name__ == '__main__':

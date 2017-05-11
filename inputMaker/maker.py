@@ -6,23 +6,46 @@ import os
 
 HR_res = {'height' : 640, 'width' : 480}
 LR_res = {'height' : 320, 'width' : 240}
+cut_time = [360,-360]
 
-def makeSRInput(name, option, resize=True):
+def makeSRInput(option='original', resize=True):
+    """
+    SR에 사용될 데이터 셋을 생성
+    :param option: 
+     Video 처리 옵션
+    :param resize: 
+     True : Low resolution
+     False : High resolution
+    :return: 
+    """
+    for name in utils.path.videos:
+        # cut : 앞뒤 영상
+        videoDir = utils.path.get_origin_video_path(name,option)
+        videofiles = utils.path.getFileList(videoDir)
 
-    videoDir =None
-    res = HR_res
-    if resize: res = LR_res
-    videoDir = utils.path.getVideoOriginDirPath(name,option)
+        for video in videofiles:
+            utils.video.editVideoCut(name, video,cut_time[0],cut_time[1])
 
-    videofiles = utils.path.getFileList(videoDir)
+        # resize
+        videoDir = utils.path.get_origin_video_path(name,option='edit')
+        videofiles = utils.path.getFileList(videoDir)
 
-    # resize
-    for file in videofiles:
-        utils.video.editVideoResize(name,file,res['height'],res['width'],resize)
+        res = HR_res
+        if resize: res = LR_res
 
-    if resize : videoDir = utils.path.getVideoDowngradeDirPath(name,option)
+        for file in videofiles:
+            utils.video.editVideoResize(name,file,res['height'],res['width'],resize)
 
-    # cut
+        # extract frame
+        if resize : videoDir = utils.path.get_lr_video_path(name,option)
+        else :   videoDir = utils.path.get_hr_video_path(name,option)
+
+        videofiles = utils.path.getFileList(videoDir)
+
+        for videofile in videofiles:
+            utils.video.extractFrame(videofile,option,resize)
+
+
 
 
 if __name__=='__main__':
@@ -35,4 +58,7 @@ if __name__=='__main__':
     #     os.rename(file,os.path.join(dir,'onepiece'+str(x)+'.mp4'))
     #     x+=1
 
-    makeSRInput('conan','original',resize=True)
+
+
+    makeSRInput('original', resize=False)
+    makeSRInput('original', resize=True)
