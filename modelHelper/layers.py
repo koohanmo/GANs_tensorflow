@@ -48,7 +48,7 @@ class batch_norm(object):
                                                 scope=self.name)
 
 
-def conv2d(t_input,ksize,strides,padding,layerName,initializer=variables.variable_random):
+def conv2d(t_input,ksize,strides,padding,layerName,initializer=variables.variable_xavier):
     """
     Convolution Layer
     :param t_input:
@@ -306,8 +306,7 @@ if __name__=="__main__":
                         ksize = [3,3,1,32],
                         strides = [1,1,1,1],
                         padding='SAME',
-                        layerName='convLayer1',
-                        is_batch_norm=True
+                        layerName='convLayer1'
                         )
 
 
@@ -322,8 +321,8 @@ if __name__=="__main__":
                         ksize=[3, 3, 32, 64],
                         strides=[1, 1, 1, 1],
                         padding='SAME',
-                        layerName='convLayer2',
-                        is_batch_norm=True)
+                        layerName='convLayer2'
+                        )
 
     maxpoolLayer2 = maxPool(convLayer2,
                             ksize=[1, 2, 2, 1],
@@ -333,22 +332,19 @@ if __name__=="__main__":
 
     flattenLayer = flatten(maxpoolLayer2, 7*7*64)
 
-    fcLayer1 = fullyConnected(input=flattenLayer,
+    fcLayer1 = fullyConnected(t_input=flattenLayer,
                               shape=[7*7*64, 100],
-                              layerName='fullyConnected1',
-                              is_batch_norm=True
+                              layerName='fullyConnected1'
                               )
 
-    fcLayer2 = fullyConnected(input=fcLayer1,
+    fcLayer2 = fullyConnected(t_input=fcLayer1,
                               shape=[100, 50],
-                              layerName='fullyConnected2',
-                              is_batch_norm=True
+                              layerName='fullyConnected2'
                               )
 
-    fcLayer3 = fullyConnected(input=fcLayer2,
+    fcLayer3 = fullyConnected(t_input=fcLayer2,
                               shape=[50, 25],
-                              layerName='fullyConnected3',
-                              is_batch_norm=True
+                              layerName='fullyConnected3'
                               )
 
     with tf.name_scope('logits'):
