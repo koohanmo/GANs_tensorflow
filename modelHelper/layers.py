@@ -278,6 +278,33 @@ def saveSaver(session, last_epoch ,global_step ,saver, check_dir, model_name = '
 
     return saver
 
+def conv2d_transpose(t_input, filter_shape, output_shape, strides, layerName):
+    """
+    deconvolution 디컨볼루션
+    weight:filter initializer xavier
+    :param t_input:
+        tensor input
+    :param filter_shape:
+        filter dim
+    :param output_shape:
+        output shape
+    :param strides:
+        strides = [1,s,s,1]
+    :param layerName:
+        name_scope
+    :return:
+        tf.nn.conv2d_transpose
+    """
+    with tf.name_scope(name = layerName):
+        filter = variables.variable_xavier(name = 'weight', shape = filter_shape)
+        return tf.nn.conv2d_transpose(value = t_input,
+                                  filter = filter,
+                                  output_shape=output_shape,
+                                  strides=strides)
+
+def pixelShuffler():
+    pass
+
 if __name__=="__main__":
     """
     Test code...

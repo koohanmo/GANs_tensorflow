@@ -28,11 +28,18 @@ class SRGAN(object):
     def train(self):
         pass
 
-    def generator(self):
-        pass
+    def generator(self,input_low):
+        with tf.name_scope('generator'):
+            layer1 = mh.layers.conv2d(t_input = input_low,
+                                      ksize = [9,9,3,64],
+                                      strides = [1,2,2,1],
+                                      padding = 'SAME',
+                                      layerName = 'gen_layer1')
+            act1 = mh.layers.lrelu(layer1)
+
 
     def discriminator(self,inputs,lables, reuse=False):
-        with tf.name.scope('discriminator'):
+        with tf.name_scope('discriminator'):
             # [batchSize, self.output_img_shape[0], self.output_img_shape[1],3]
             # [batchSize, 640, 480, 3]
             layer1 = mh.layers.conv2d(layerName='dis_layer1',
