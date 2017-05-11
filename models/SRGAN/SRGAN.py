@@ -82,15 +82,28 @@ class SRGAN(object):
                                            strides=[1, 1, 1, 1],
                                            layerName='gen_layer3'
                                            )
-            # x = mh.layers.pixelShuffler(x)
+            # 256 / (2**2) = 64 ~ n_split
+            x = mh.layers.pixelShuffler(t_input = x,
+                                        r = 2,
+                                        n_split = 64
+                                        )
             # pixelShuffler...
             x = mh.layers.lrelu(x)
 
             # k3n256s1
             # layer gen_layer4
-            # x = mh.layers.conv2d_transpose(t_input = x , ...)
-            # x = mh.layers.pixelShuffler(x)
-            # x = mh.layers.lrelu(x)
+            x = mh.layers.conv2d_transpose(t_input = x,
+                                           fliter_shape=[3, 3, 64, 256],
+                                           output_shape=[-1, 320, 240, 256],
+                                           strides=[1, 1, 1, 1],
+                                           layerName='gen_layer4'
+                                           )
+            # 256 / (2**2) = 64 ~ n_split
+            x = mh.layers.pixelShuffler(t_input = x,
+                                        r = 2,
+                                        n_split = 16
+                                        )
+            x = mh.layers.lrelu(x)
 
             # k9n3s1
             # layer gen_layer5
