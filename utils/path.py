@@ -36,7 +36,8 @@ def get_origin_video_path(name,option='original'):
      Ex) 'Video/origin/conan'
     """
     ret = os.path.join(origin_video_dir,name,option)
-    return is_exists(ret)
+    make_dir(ret)
+    return ret
 
 def get_hr_video_path(name,option='original'):
     """
@@ -51,7 +52,8 @@ def get_hr_video_path(name,option='original'):
      Ex) 'Video/origin/conan'
     """
     ret = os.path.join(hr_video_dir,name,option)
-    return is_exists(ret)
+    make_dir(ret)
+    return ret
 
 def get_lr_video_path(name, option='original'):
     """
@@ -66,7 +68,8 @@ def get_lr_video_path(name, option='original'):
      Ex) 'Video/origin/conan'
     """
     ret = os.path.join(lr_video_dir, name, option)
-    return is_exists(ret)
+    make_dir(ret)
+    return ret
 
 
 def get_hr_image_path(name, option='original'):
@@ -80,7 +83,8 @@ def get_hr_image_path(name, option='original'):
      Ex) 'ImageFiles/origin/conan'
     """
     ret = os.path.join(hr_image_dir, name, option)
-    return is_exists(ret)
+    make_dir(ret)
+    return ret
 
 def get_lr_image_path(name, option='original'):
     """
@@ -93,7 +97,8 @@ def get_lr_image_path(name, option='original'):
      Ex) 'ImageFiles/origin/conan'
     """
     ret = os.path.join(lr_image_dir, name, option)
-    return is_exists(ret)
+    make_dir(ret)
+    return ret
 
 
 def getDirList(dir):
