@@ -2,12 +2,12 @@ import os
 
 # path variables about video
 videos = ['conan', 'naruto', 'onepiece']
-videoDir = "D:\Project\GANs_tensorflow\Video"
+videoDir = "D:\Dataset\Video"
 origin_video_dir = os.path.join(videoDir,'origin')
 hr_video_dir = os.path.join(videoDir, 'HR')
 lr_video_dir = os.path.join(videoDir, 'LR')
 
-imageDir = "D:\Project\GANs_tensorflow\Image"
+imageDir = "D:\Dataset\Image"
 hr_image_dir = os.path.join(imageDir, 'HR')
 lr_image_dir = os.path.join(imageDir, 'LR')
 

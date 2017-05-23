@@ -106,14 +106,13 @@ def editVideoCut(name, filename, opening, ending):
 
      Ex) 
     """
-
-    clip = VideoFileClip(filename,audio=False).subclip(opening,ending)
-
-    edit_videodir = path.get_origin_video_path(name,option='edit')
+    edit_videodir = path.get_origin_video_path(name, option='edit')
     clip_name = os.path.join(edit_videodir, os.path.basename(filename))
 
-    path.make_dir(edit_videodir)
-    clip.write_videofile(clip_name)
+    if not os.path.exists(clip_name):
+        clip = VideoFileClip(filename,audio=False).subclip(opening,ending)
+        path.make_dir(edit_videodir)
+        clip.write_videofile(clip_name)
     return clip_name
 
 
