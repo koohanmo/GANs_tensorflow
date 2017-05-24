@@ -7,14 +7,14 @@ class VGG19:
         self.out, self.phi = self.build_model(input, is_training)
         self.loss = self.inference_loss(self.out, t)
 
-    def build_model(self, input, is_training, reuse=False):
+    def build_model(self, t_input, is_training, reuse=False):
 
         with tf.variable_scope('vgg19', reuse=reuse):
             phi = []
             with tf.variable_scope('conv1a'):
                 conv1a = layers.conv2d(
-                                    layerName='vgg19_cov1a',
-                                    t_input=input,
+                                    layerName='vgg19_conv1a',
+                                    t_input=t_input,
                                     ksize= [3, 3, 3, 64],
                                     strides=[1,1,1,1],
                                     padding='SAME')
@@ -26,7 +26,7 @@ class VGG19:
 
 
             with tf.variable_scope('conv1b'):
-                conv1b = layers.conv2d(layerName='vgg19_cov1b',
+                conv1b = layers.conv2d(layerName='vgg19_conv1b',
                                   t_input=conv1a,
                                   ksize=[3,3,64,64],
                                   strides=[1,1,1,1],
@@ -41,12 +41,14 @@ class VGG19:
                                         t_input=conv1b,
                                         ksize=2,
                                         strides=2)
+            # pool 1
 
             with tf.variable_scope('conv2a'):
-                conv2a = layers.conv2d(t_input=pool_first,
-                                  ksize=[3, 3, 64, 128],
-                                  strides=[1,1,1,1],
-                                  padding='SAME')
+                conv2a = layers.conv2d(layerName='vgg19_conv2a',
+                                       t_input=pool_first,
+                                       ksize=[3, 3, 64, 128],
+                                       strides=[1,1,1,1],
+                                       padding='SAME')
 
                 BN = layers.batch_norm()
                 conv2a = BN(conv2a)
@@ -54,7 +56,8 @@ class VGG19:
 
 
             with tf.variable_scope('conv2b'):
-                conv2b = layers.conv2d(t_input=conv2a,
+                conv2b = layers.conv2d(layerName='vgg19_conv2b',
+                                       t_input=conv2a,
                                        ksize=[3, 3, 128, 128],
                                        strides=[1,1,1,1],
                                        padding='SAME')
@@ -65,8 +68,11 @@ class VGG19:
 
             pool_second= layers.maxPool(conv2b, 2, 2)
 
+            # pool 2
+
             with tf.variable_scope('conv3a'):
-                conv3a = layers.conv2d(t_input=conv2b,
+                conv3a = layers.conv2d(layerName='vgg19_conv3a',
+                                       t_input=pool_second,
                                        ksize=[3, 3, 128, 256],
                                        strides=[1,1,1,1],
                                        padding='SAME')
@@ -77,7 +83,8 @@ class VGG19:
 
 
             with tf.variable_scope('conv3b'):
-                conv3b = layers.conv2d(t_input=conv3a,
+                conv3b = layers.conv2d(layerName='vgg19_conv3b',
+                                       t_input=conv3a,
                                        ksize=[3, 3, 256, 256],
                                        strides=[1,1,1,1],
                                        padding='SAME')
@@ -87,19 +94,21 @@ class VGG19:
                 conv3b = layers.lrelu(conv3b)
 
             with tf.variable_scope('conv3c'):
-                conv3c = layers.conv2d(t_input=conv3b,
-                                  ksize=[3, 3, 256, 256],
-                                  strides=[1,1,1,1],
-                                  padding='SAME')
+                conv3c = layers.conv2d(layerName='vgg19_conv3c',
+                                       t_input=conv3b,
+                                       ksize=[3, 3, 256, 256],
+                                       strides=[1,1,1,1],
+                                       padding='SAME')
                 BN = layers.batch_norm()
                 conv3c = BN(conv3c)
                 conv3c = layers.lrelu(conv3c)
 
             with tf.variable_scope('conv3d'):
-                conv3d = layers.conv2d(t_input=conv3c,
+                conv3d = layers.conv2d(layerName='vgg19_conv3d',
+                                       t_input=conv3c,
                                        ksize=[3, 3, 256, 256],
                                        strides=[1,1,1,1],
-                                       padding='SMAE')
+                                       padding='SAME')
                 BN = layers.batch_norm()
                 conv3d = BN(conv3d)
                 conv3d = layers.lrelu(conv3d)
@@ -109,16 +118,18 @@ class VGG19:
 
 
             with tf.variable_scope('conv4a'):
-                conv4a = layers.conv2d(t_input=pool_third,
-                                  ksize=[3, 3, 256, 512],
-                                  strides=[1,1,1,1],
-                                  padding='SAME')
+                conv4a = layers.conv2d(layerName='vgg19_conv4a',
+                                       t_input=pool_third,
+                                       ksize=[3, 3, 256, 512],
+                                       strides=[1,1,1,1],
+                                       padding='SAME')
                 BN = layers.batch_norm()
                 conv4a = BN(conv4a)
                 conv4a = layers.lrelu(conv4a)
 
             with tf.variable_scope('conv4b'):
-                conv4b = layers.conv2d(t_input=conv4a,
+                conv4b = layers.conv2d(layerName='vgg19_conv4b',
+                                       t_input=conv4a,
                                        ksize=[3, 3, 512, 512],
                                        strides=[1, 1, 1, 1],
                                        padding='SAME')
@@ -128,7 +139,8 @@ class VGG19:
 
 
             with tf.variable_scope('conv4c'):
-                conv4c = layers.conv2d(t_input=conv4b,
+                conv4c = layers.conv2d(layerName='vgg19_conv4c',
+                                       t_input=conv4b,
                                        ksize=[3, 3, 512, 512],
                                        strides=[1, 1, 1, 1],
                                        padding='SAME')
@@ -138,7 +150,8 @@ class VGG19:
 
 
             with tf.variable_scope('conv4d'):
-                conv4d = layers.conv2d(t_input=conv4c,
+                conv4d = layers.conv2d(layerName='vgg19_conv4d',
+                                       t_input=conv4c,
                                        ksize=[3, 3, 512, 512],
                                        strides=[1, 1, 1, 1],
                                        padding='SAME')
@@ -153,7 +166,8 @@ class VGG19:
 
 
             with tf.variable_scope('conv5a'):
-                conv5a = layers.conv2d(t_input=pool_fourth,
+                conv5a = layers.conv2d(layerName='vgg19_conv5a',
+                                       t_input=pool_fourth,
                                        ksize=[3, 3, 512, 512],
                                        strides=[1, 1, 1, 1],
                                        padding='SAME')
@@ -162,7 +176,8 @@ class VGG19:
                 conv5a = layers.lrelu(conv5a)
 
             with tf.variable_scope('conv5b'):
-                conv5b = layers.conv2d(t_input=conv5a,
+                conv5b = layers.conv2d(layerName='vgg19_conv5b',
+                                       t_input=conv5a,
                                        ksize=[3, 3, 512, 512],
                                        strides=[1, 1, 1, 1],
                                        padding='SAME')
@@ -171,7 +186,8 @@ class VGG19:
                 conv5b = layers.lrelu(conv5b)
 
             with tf.variable_scope('conv5c'):
-                conv5c = layers.conv2d(t_input=conv5b,
+                conv5c = layers.conv2d(layerName='vgg19_conv5c',
+                                       t_input=conv5b,
                                        ksize=[3, 3, 512, 512],
                                        strides=[1, 1, 1, 1],
                                        padding='SAME')
@@ -180,7 +196,8 @@ class VGG19:
                 conv5c = layers.lrelu(conv5c)
 
             with tf.variable_scope('conv5d'):
-                conv5d = layers.conv2d(t_input=conv5c,
+                conv5d = layers.conv2d(layerName='vgg19_conv5d',
+                                       t_input=conv5c,
                                        ksize=[3, 3, 512, 512],
                                        strides=[1, 1, 1, 1],
                                        padding='SAME')
@@ -192,10 +209,10 @@ class VGG19:
 
             pool_fifth = layers.maxPool(conv5d, 2, 2)
 
-            flattend = layers.flatten(t_input=pool_fifth,flatDim=1)
+            flatten = layers.flatten(t_input=pool_fifth,flatDim=1)
 
             with tf.variable_scope('fc1'):
-                fc1 = layers.fullyConnected(flattend, 4096)
+                fc1 = layers.fullyConnected(flatten, 4096)
                 fc1 = layers.lrelu(fc1)
             with tf.variable_scope('fc2'):
                 fc2 = layers.fullyConnected(fc1, 4096)
