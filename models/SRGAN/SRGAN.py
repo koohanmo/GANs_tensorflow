@@ -7,7 +7,7 @@
 
 import tensorflow as tf
 import modelHelper as mh
-
+import vgg19 as VGG
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -17,13 +17,43 @@ class SRGAN(object):
                  output_img_shape):
         self.input_img_shape = input_img_shape
         self.output_img_shape = output_img_shape
+        self.vgg = VGG(None, None)
         pass
 
     def build(self):
         pass
 
-    def inference(self):
-        pass
+    def inference(self, img_hr, img_sr, true_output, fake_output):
+        def inference_content_loss(img_hr, img_sr):
+            _, x_phi = self.vgg.build_model(img_hr, tf.constant(False), False)
+            _, imitation_phi = self.vgg.build_model(img_sr, tf.constant(False), True)
+            content_loss = None
+
+            for i in range(len(x_phi)):
+                l2_loss = tf.nn.l2_loss(x_phi[i] - imitation_phi[i])
+                if content_loss is None:
+                    content_loss = l2_loss
+                else:
+                    content_loss = content_loss + l2_loss
+            return tf.reduce_mean(content_loss)
+
+        def inference_adversarial_loss(true_output, fake_output):
+            alpha = 1e-5
+            g_loss = tf.reduce_mean(tf.nn.l2_loss(fake_output - tf.ones_like(fake_output)))
+            d_loss_real = tf.reduce_mean(tf.nn.l2_loss(true_output - tf.ones_like(true_output)))
+            d_loss_fake = tf.reduce_mean(tf.nn.l2_loss(fake_output - tf.zeros_like(fake_output)))
+            d_loss = d_loss_real + d_loss_fake
+            return g_loss*alpha , d_loss*alpha
+
+        def inference_adversarial_loss_with_sigmoid(real_output, fake_output):
+            pass
+
+        content_loss = inference_content_loss(img_hr, img_sr)
+        generator_loss, discriminator_loss = inference_adversarial_loss(true_output, fake_output)
+        g_loss = content_loss + generator_loss
+        d_loss = discriminator_loss
+        return g_loss, d_loss
+
 
     def train(self):
         pass
@@ -217,6 +247,7 @@ class SRGAN(object):
             pre_act = bn2(conv2)
             ret = tf.add(inputs, pre_act)
         return ret
+
 
 
 if __name__=="__main__":
