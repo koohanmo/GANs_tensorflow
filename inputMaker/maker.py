@@ -43,7 +43,7 @@ def makeSRInput(option='original', resize=True):
         videofiles = utils.path.getFileList(videoDir)
 
         for videofile in videofiles:
-            utils.video.extractFrame(videofile,option,resize)
+            utils.video.extractFrame(name, videofile, option, resize)
 
 
 
@@ -56,9 +56,11 @@ if __name__=='__main__':
     # x=1
     # for file in files:
     #     os.rename(file,os.path.join(dir,'onepiece'+str(x)+'.mp4'))
-    #     x+=1
+    #     x+=1+
 
 
-
-    makeSRInput('original', resize=False)
-    makeSRInput('original', resize=True)
+    while True:
+        try:
+            makeSRInput('original', resize=False)
+            makeSRInput('original', resize=True)
+        except : continue
