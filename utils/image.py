@@ -101,7 +101,7 @@ def merge(imgs,
           save_option = False,
           center_option = False,
           view_option = True,
-          save_path = "/sample_image/" ):
+          save_path = "../sample/" ):
     """
         이미지 여러개를 합쳐서 하나의 이미지로 생성.
 
