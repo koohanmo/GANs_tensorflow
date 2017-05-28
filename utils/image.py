@@ -101,7 +101,8 @@ def merge(imgs,
           save_option = False,
           center_option = False,
           view_option = True,
-          save_path = "../sample/" ):
+          save_path = "../sample/" ,
+          file_name = ""):
     """
         이미지 여러개를 합쳐서 하나의 이미지로 생성.
 
@@ -164,8 +165,9 @@ def merge(imgs,
                 )
 
     if save_option:
-        file_name = str(datetime.now().strftime('%Y-%m-%d %H%M%S'))
-        result_img.save(save_path + file_name + ".png")
+        if file_name == "":
+            file_name = str(datetime.now().strftime('%Y-%m-%d %H%M%S')) + ".png"
+        result_img.save(save_path + file_name)
     if view_option:
         result_img.show()
     return result_img
