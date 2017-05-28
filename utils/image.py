@@ -108,9 +108,7 @@ def merge(imgs,
         :param img:
          Image 타입의 2차원 array
          eg. [ [이미지1-1,이미지1-2,이미지1-3], [이미지2-1,이미지2-2,이미지2-3], [이미지3-1,이미지3-2,이미지3-3] ]
-
-        :param save_option:
-         결과 이미지를 저장할지 말지 결정하는 옵션. 
+=]지 결정하는 옵션. 
          True : 저장 / False : 저장하지않음 
 
         :param view_option:
@@ -147,7 +145,7 @@ def merge(imgs,
     height = one_height * row_num
     result_img = Image.new("RGBA", (width, height))
     for r in range(row_num):
-        for c in range(column_num):
+        for c in range(len(imgs[r])):
             if center_option:
                 result_img.paste(
                     imgs[r][c],
@@ -214,7 +212,7 @@ if __name__ == "__main__":
 
     arr = []
     arr.append([I_LR, I_blur, I_resized, I_bicubic])
-    arr.append([I_LR, I_blur, I_resized, I_bicubic])
+    arr.append([I_LR, I_blur, I_bicubic])
     arr.append([I_LR, I_blur, I_resized, I_bicubic])
 
     I_merged = merge(arr, save_option=True, center_option=True)
