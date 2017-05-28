@@ -25,7 +25,7 @@ def image_dir_to_np(dir):
 
 def resize(img,factor,intp = Image.NEAREST):
     """
-        LR이미지를 (bicubic interpolation을 이용하여) 확대/축소.
+        이미지를 (interpolation을 적용하여) 확대/축소.
         
         :param img:
          Image 타입의 이미지
@@ -64,9 +64,8 @@ def apply_filter(img, filt=ImageFilter.GaussianBlur):
         
         :param filt:
         적용할 필터.
-        default;        ImageFilter.GaussianBlur 
-        candidates;
-                        ImageFilter.BLUR			: 기본 블러
+        default;        ImageFilter.GaussianBlur        
+        candidates;     ImageFilter.BLUR			: 기본 블러
                         ImageFilter.GaussianBlur    : 가우시안 블러
                         ImageFilter.CONTOUR     	: 윤곽
                         ImageFilter.DETAIL			: 디테일살리기
@@ -85,8 +84,7 @@ def apply_filter(img, filt=ImageFilter.GaussianBlur):
                         ImageFilter.ModeFilter		: Mode 필터 적용(??)
                         
                         ImageFilter.RankFilter(size ,rank)	: 사이즈 내 n번째 등수로 set
-                        ImageFilter.Kernel(size ,kernel ,scale=None ,offset=0) : 커널 직접 설정 
-        
+                        ImageFilter.Kernel(size ,kernel ,scale=None ,offset=0) : 커널 직접 설정         
         
         :return:
         필터가 적용된 이미지(Image 타입)
