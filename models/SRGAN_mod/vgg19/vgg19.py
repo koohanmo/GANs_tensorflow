@@ -11,6 +11,27 @@ class VGG19:
         self.loss = self.inference_loss(self.out, t)
 
     def build_model(self, x, is_training, reuse=False):
+        """
+
+        :param x:
+        :param is_training:
+        :param reuse:
+        :return:
+        """
+        VGG_MEAN = [103.939, 116.779, 123.68]  # 0 : blue_mean, 1 : green_mean, 2 : red_mean
+        grid = 96
+        rgb_scaled = x * 255.0
+        red, green, blue = tf.split(axis=3, num_or_size_splits=3, value=rgb_scaled)
+        assert red.get_shape().as_list()[1:] == [grid, grid, 1]
+        assert green.get_shape().as_list()[1:] == [grid, grid, 1]
+        assert blue.get_shape().as_list()[1:] == [grid, grid, 1]
+        bgr = tf.concat(axis=3, values=[
+            blue - VGG_MEAN[0],
+            green - VGG_MEAN[1],
+            red - VGG_MEAN[2],
+        ])
+        assert bgr.get_shape().as_list()[1:] == [grid, grid, 3]
+
         with tf.variable_scope('vgg19', reuse=reuse):
             phi = []
             with tf.variable_scope('conv1a'):
@@ -100,14 +121,14 @@ class VGG19:
                 x = full_connection_layer(x, 4096)
                 x = lrelu(x)
             with tf.variable_scope('softmax'):
-                x = full_connection_layer(x, 100)
+                x = full_connection_layer(x, 1000)
 
             return x, phi
 
 
     def inference_loss(self, out, t):
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits(
-            labels=tf.one_hot(t, 100),
+            labels=tf.one_hot(t, 1000),
             logits=out)
         return tf.reduce_mean(cross_entropy)
 
